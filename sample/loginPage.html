@@ -6,9 +6,9 @@
 </head>
 <body>
     <div class ="loginForm">
-    <form action ="/app/loginRequest.php" method = "POST">
+    <form action ="/app/loginRequest.php" method = "POST" onsubmit="return validateForm">
         <h1> Log In</h1>
-        <input name = "username" placeholder = "Username"/>
+        <input name = "email" placeholder = "Email"/>
         <input name = "password" type = "password" placeholder = "Password"/>
         <button type = "submit"> Log In </button>
     </form>
