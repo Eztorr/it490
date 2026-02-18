@@ -1,6 +1,4 @@
 <?php
-
-
 if (!isset($_POST))
 {
 	$msg = "NO POST MESSAGE SET, POLITELY FUCK OFF";
