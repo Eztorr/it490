@@ -18,10 +18,10 @@ if ($mydb->errno != 0)
 echo "successfully connected to database".PHP_EOL;
 
 
-function doLogin($username,$password)
+function doLogin($email,$password)
 {
     global $mydb;
-    $query = "select email, password from Users where Users.email='$username';";
+    $query = "select id, email, password from Users where Users.email='$email';";
     $response = $mydb->query($query);
 
     if ($mydb->errno != 0)
@@ -38,27 +38,24 @@ function doLogin($username,$password)
         
         if ($password === $row['password']) 
 	{
+	    $token = bin2hex(random_bytes(32));
+	    $expiration_date = date("Y-m-d H:i:s", strtotime("+1 hour"));
+	    $user_id = $response['id'];
 
-            return array(
-                "status" => "success",
-		"message" => "ACCEPT"
-
-            );
+	    $query = "INSERT INTO Sessions (user_id, session_token, expires) VALUES ('$user_id', '$token', '$expiration_date'";
+            return array("status" => "ACCEPT", "message" => "Login successful", "token" => "$token");
         }
     }
 
-    return array(
-        "status" => "fail",
-        "message" => "DENY"
-    );
+    return array("status" => "DENY", "message" => "Login denied");
 }
 
-function doRegister($username, $password)
+function doRegister($email, $password)
 {
 
     global $mydb;
    
-    $query = "SELECT email FROM Users WHERE email = '$username'";
+    $query = "SELECT email FROM Users WHERE email = '$email'";
     $response = $mydb->query($query);
    
        if ($response && $response->num_rows > 0) {
@@ -66,7 +63,7 @@ function doRegister($username, $password)
     }
    
    
-    $query = "insert into Users (email, password) values ('$username', '$password');";
+    $query = "insert into Users (email, password) values ('$email', '$password');";
     $mydb->query($query);
     if ($mydb->errno != 0)
 {
@@ -75,13 +72,15 @@ function doRegister($username, $password)
         return array("status" => "error", "message" => "error");
     }
 
-    return array("status" => "success", "message" => "successful registration");
-
+    return array("status" => "ACCEPT", "message" => "successful registration");
+}
 
     function doValidate($sessionID)   
   {
         global $mydb;
 	$query = "SELECT * FROM Sessions WHERE session_token = $sessionID";
+	$response = $mydb->query($query);
+
 	 if ($mydb->errno != 0)
 {
             echo "failed to execute query:".PHP_EOL;
@@ -89,10 +88,14 @@ function doRegister($username, $password)
             return array("status" => "error", "message" => "session not valid");
 	 }
 
-	return array("status" => "success", "message" => "valid session");
+	       if ($response && $response->num_rows > 0) {
+        return array("status" => "ACCEPT", "message" => "valid session");
+    }
+
+	return array("status" => "DENY", "message" => "invalid session");
     
  }
-}   
+   
 
 
 function requestProcessor($request)
@@ -106,7 +109,7 @@ function requestProcessor($request)
   switch ($request['type'])
   {
     case "Login":
-      return doLogin($request['username'],$request['password']);
+      return doLogin($request['email'],$request['password']);
     case "Registration":
 	    return doRegister($request['email'],$request['password']);
     case "validate_session":
