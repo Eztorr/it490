@@ -40,9 +40,10 @@ function doLogin($email,$password)
 	{
 	    $token = bin2hex(random_bytes(32));
 	    $expiration_date = date("Y-m-d H:i:s", strtotime("+1 hour"));
-	    $user_id = $response['id'];
+	    $user_id = $row['id'];
 
-	    $query = "INSERT INTO Sessions (user_id, session_token, expires) VALUES ('$user_id', '$token', '$expiration_date'";
+	    $query = "INSERT INTO Sessions (user_id, session_token, expires) VALUES ('$user_id', '$token', '$expiration_date') ON DUPLICATE KEY UPDATE session_token = '$token', expires = '$expiration_date';";
+	    $mydb->query($query);
             return array("status" => "ACCEPT", "message" => "Login successful", "token" => "$token");
         }
     }

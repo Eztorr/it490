@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS `data`.`Sessions` (
 
 	PRIMARY KEY(`id`),
 	UNIQUE (`session_token`),
+	UNIQUE (`user_id`),
 
 	CONSTRAINT `fk_session_user`
 		FOREIGN KEY(user_id)
