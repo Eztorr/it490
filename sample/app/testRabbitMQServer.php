@@ -1,14 +1,19 @@
-#!/usr/bin/php
+i#!/usr/bin/php
 <?php
 require_once('path.inc');
 require_once('get_host_info.inc');
 require_once('rabbitMQLib.inc');
 
-function doLogin($username,$password)
+function doLogin($email,$password)
 {
+	if($email == "test" && $password == "test")
+		return true;
     // lookup username in databas
     // check password
-    return true;
+	if ($email == "test" && $password == "test")
+		return true;
+	else
+		return false;
     //return false if not valid
 }
 
@@ -20,16 +25,25 @@ function requestProcessor($request)
   {
     return "ERROR: unsupported message type";
   }
-  switch ($request['type'])
+  $type=strtolower($request['type']);
+  switch($type)
   {
-    case "login":
-      return doLogin($request['username'],$request['password']);
-    case "validate_session":
-      return doValidate($request['sessionId']);
+  case "login":
+	$ok = doLogin($request['email'], $request ['password']);
+	if ($ok) {
+	    return array(
+		   "returnCode" => 1,
+       		   "message" => "Login accepted"
+	    );
+	}
+	else{
+	    return array(
+	           "returnCode" => 0,
+		   "message" => "Login denied"
+	    );
+	}
   }
-  return array("returnCode" => '0', 'message'=>"Server received request and processed");
 }
-
 $server = new rabbitMQServer("testRabbitMQ.ini","testServer");
 
 echo "testRabbitMQServer BEGIN".PHP_EOL;
