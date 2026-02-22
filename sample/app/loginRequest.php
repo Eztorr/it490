@@ -27,11 +27,19 @@ $response = $client->send_request($request);
 //$response = $client->publish($request);
 */
 $request = array();
-$request ['type'] = "Login";
-$request ['username'] = $_POST['username'];
+$request ['type'] = "login";
+$request ['email'] = $_POST['email'];
 $request ['password'] = $_POST['password'];
 $response = $client->send_request($request);
 
-$payload = json_encode($response);
-echo $payload;
+session_start();
+if ($response['returnCode'] ==1){
+	$_SESSION["user"] = $POST["email"];
+	header ("Location: /index.php");
+	exit();
+}
+else {
+	echo "Incorrect email or password";
+}
+
 
