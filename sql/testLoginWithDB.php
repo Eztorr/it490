@@ -44,11 +44,11 @@ function doLogin($email,$password)
 
 	    $query = "INSERT INTO Sessions (user_id, session_token, expires) VALUES ('$user_id', '$token', '$expiration_date') ON DUPLICATE KEY UPDATE session_token = '$token', expires = '$expiration_date';";
 	    $mydb->query($query);
-            return array("status" => "ACCEPT", "message" => "Login successful", "token" => "$token");
+            return array("returnCode" => "1", "message" => "Login successful", "token" => "$token");
         }
     }
 
-    return array("status" => "DENY", "message" => "Login denied");
+    return array("returnCode" => "0", "message" => "Login denied");
 }
 
 function doRegister($email, $password)
@@ -73,7 +73,7 @@ function doRegister($email, $password)
         return array("status" => "error", "message" => "error");
     }
 
-    return array("status" => "ACCEPT", "message" => "successful registration");
+    return array("returnCode" => "1", "message" => "successful registration");
 }
 
     function doValidate($sessionID)   
@@ -90,10 +90,10 @@ function doRegister($email, $password)
 	 }
 
 	       if ($response && $response->num_rows > 0) {
-        return array("status" => "ACCEPT", "message" => "valid session");
+        return array("returnCode" => "1", "message" => "valid session");
     }
 
-	return array("status" => "DENY", "message" => "invalid session");
+	return array("returnCode" => "0", "message" => "invalid session");
     
  }
    
@@ -109,7 +109,7 @@ function requestProcessor($request)
   }
   switch ($request['type'])
   {
-    case "Login":
+    case "login":
       return doLogin($request['email'],$request['password']);
     case "Registration":
 	    return doRegister($request['email'],$request['password']);
