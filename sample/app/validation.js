@@ -1,17 +1,19 @@
 //listen to submit button 
-const form = document.getElementById('registerForm');
+const form = document.getElementById('validateForm');
 
+//event lister for login
 form.addEventListener('submit', function (event) {
         //do not send php request yet
         event.preventDefault();
 
         if(validateInput()){
-                form.submit();
+                this.submit();
         }else{
                 alert("INVALID INPUT TRY AGAIN");
         }
 
 });
+
 
 //validate email input
 function validateInput(){
@@ -31,13 +33,7 @@ function validateInput(){
         const emailRegex = /^([a-zA-Z0-9._%-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6})$/;
         const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^a-zA-Z0-9])\S{8,}$/;
 
+        return emailInput.match(emailRegex) && passwordInput.match(passwordRegex);
 
-        if(emailInput.match(emailRegex) && passwordInput.match(passwordRegex) ){
-                //store response
-                form.submit();
-                return true;
-        }
-
-        return false;
 }
 
