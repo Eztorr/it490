@@ -23,6 +23,13 @@ $request ['email'] = $_POST['email'];
 $request ['password'] = $_POST['password'];
 $response = $client->send_request($request);
 
-$payload = json_encode($response);
-echo $payload;
 
+if($response['returnCode'] == "1"){
+	//aproved
+	header("Location: ../loginPage.html");
+	exit();
+}else{
+	//denided
+	header("Location: ../registration.html");
+	exit();
+}
