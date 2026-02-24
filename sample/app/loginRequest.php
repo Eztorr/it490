@@ -1,4 +1,5 @@
 <?php
+session_start();
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
@@ -34,12 +35,12 @@ $response = $client->send_request($request);
 
 session_start();
 if ($response['returnCode'] ==1){
-	$_SESSION["user"] = $POST["email"];
+	$_SESSION["token"] = $response["token"];
 	header ("Location: /index.php");
 	exit();
 }
 else {
-	echo "Incorrect email or password";
+	echo "<script>alert('INVALID INPUT TRY AGAIN'); window.location.href='/loginPage.html';<script>";
 }
 
 

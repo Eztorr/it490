@@ -1,3 +1,20 @@
+<?php 
+session_start();
+require_once(__DIR__ . '/app/validateSession.php');
+if (!isset($_SESSION['token']) || empty($_SESSION['token']))
+{
+	header("Location: /loginPage.html");
+	exit();
+}
+
+if (!toValidateSessionTokens($_SESSION['token'])) 
+{
+	session_unset();
+	session_destroy(); 
+	header("Location: /loginPage.html");
+	exit();
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -21,7 +38,9 @@
         </head>
         <body>
             <h1> Welcome </h1>
-
+	    <form action="/app/logout.php" method = "POST">
+		<button type ="submit"> Log Out</button>
+	</form>
 </body>
     </head>
 </html>
