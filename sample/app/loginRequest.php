@@ -45,5 +45,3 @@ else {
 	header("Location: /loginPage.php");
 	exit();
 }
-
-

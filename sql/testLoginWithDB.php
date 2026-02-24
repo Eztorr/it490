@@ -97,7 +97,21 @@ function doRegister($email, $password)
 	return array("returnCode" => 0, "message" => "invalid session");
     
  }
-   
+function deleteSession($sessionID)
+{
+	global $mydb;
+	$sessionID = $mydb->real_escape_string($sessionID);
+	$query = "DELETE FROM Sessions WHERE session_token = '$sessionID'";
+	$result = $mydb ->query($query);
+
+	if ($mydb->errno != 0)
+	{
+		echo "failed to execute query:".PHP_EOL;
+		echo __FILE__.':'.__LINE__.":error: ".$mydb->error.php_EOL;
+		return array ("returnCode" => 0, "message" => "db error");
+	}
+	return array ("returnCode" => 1, "message" => "session deleted/ logged out!!!");
+}
 
 
 function requestProcessor($request)
@@ -115,7 +129,9 @@ function requestProcessor($request)
     case "Registration":
 	    return doRegister($request['email'],$request['password']);
     case "validate_session":
-      return doValidate($request['sessionId']);
+	    return doValidate($request['sessionId']);
+     case "delete_session":
+	     return deleteSession($request['token']);
   }
   return array("returnCode" => '0', 'message'=>"Server received request and processed");
 }
