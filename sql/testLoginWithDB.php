@@ -78,22 +78,23 @@ function doRegister($email, $password)
 
     function doValidate($sessionID)   
   {
-        global $mydb;
-	$query = "SELECT * FROM Sessions WHERE session_token = $sessionID";
+	 global $mydb;
+	 $sessionID = $mydb->real_escape_string($sessionID);
+	$query = "SELECT * FROM Sessions WHERE session_token ='$sessionID'";
 	$response = $mydb->query($query);
 
 	 if ($mydb->errno != 0)
 {
             echo "failed to execute query:".PHP_EOL;
             echo __FILE__.':'.__LINE__.":error: ".$mydb->error.PHP_EOL;
-            return array("status" => "error", "message" => "session not valid");
+	    return array("returnCode" => 0, "message" => "db error /session not valid");
 	 }
 
 	       if ($response && $response->num_rows > 0) {
-        return array("returnCode" => "1", "message" => "valid session");
+        return array("returnCode" => 1, "message" => "valid session");
     }
 
-	return array("returnCode" => "0", "message" => "invalid session");
+	return array("returnCode" => 0, "message" => "invalid session");
     
  }
    
