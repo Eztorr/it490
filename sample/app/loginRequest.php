@@ -7,8 +7,17 @@ require_once('path.inc');
 require_once('get_host_info.inc');
 require_once('rabbitMQLib.inc');
 
+$email = isset($_POST['email']) ? trim($_POST['email']) : '';
+$password = isset($_POST['password']) ? trim($_POST['password']) : '';
+
+if (empty($email) || empty($password)) {
+	$_SESSION["error"] = "Pretty please enter both email and password.";
+	header("Location: /loginPage.php");
+	exit();
+}
 
 $client = new rabbitMQClient("testRabbitMQ.ini","testServer");
+/*
 if (isset($argv[1]))
 {
   $msg = $argv[1];
@@ -17,15 +26,6 @@ else
 {
   $msg = "test message";
 }
-
-/**
-$request = array();
-$request['type'] = "Login";
-$request['username'] = "steve";
-$request['password'] = "password";
-$request['message'] = $msg;
-$response = $client->send_request($request);
-//$response = $client->publish($request);
 */
 $request = array();
 $request ['type'] = "login";
@@ -33,14 +33,17 @@ $request ['email'] = $_POST['email'];
 $request ['password'] = $_POST['password'];
 $response = $client->send_request($request);
 
-session_start();
-if ($response['returnCode'] ==1){
-	$_SESSION["token"] = $response["token"];
+if (isset($response['returnCode']) && (int)$response['returnCode'] === 1){
+	if (isset($response["token"])) {
+		$_SESSION['token'] = $response["token"];
+	}
 	header ("Location: /index.php");
 	exit();
 }
 else {
-	echo "<script>alert('INVALID INPUT TRY AGAIN'); window.location.href='/loginPage.html';<script>";
+	$_SESSION['error'] = "Invalid email or password.";
+	header("Location: /loginPage.php");
+	exit();
 }
 
 

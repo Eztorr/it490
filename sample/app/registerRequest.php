@@ -26,7 +26,7 @@ $response = $client->send_request($request);
 
 if($response['returnCode'] == "1"){
 	//aproved
-	header("Location: ../loginPage.html");
+	header("Location: ../loginPage.php");
 	exit();
 }else{
 	//denided

@@ -3,7 +3,7 @@ session_start();
 require_once(__DIR__ . '/app/validateSession.php');
 if (!isset($_SESSION['token']) || empty($_SESSION['token']))
 {
-	header("Location: /loginPage.html");
+	header("Location: /loginPage.php");
 	exit();
 }
 
@@ -11,7 +11,7 @@ if (!toValidateSessionTokens($_SESSION['token']))
 {
 	session_unset();
 	session_destroy(); 
-	header("Location: /loginPage.html");
+	header("Location: /loginPage.php");
 	exit();
 }
 ?>
