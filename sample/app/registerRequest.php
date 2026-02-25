@@ -24,12 +24,12 @@ $request ['password'] = $_POST['password'];
 $response = $client->send_request($request);
 
 
-if($response['returnCode'] == "1"){
+if(isset($response['returnCode']) && $response['returnCode'] == "1")){
 	//aproved
 	header("Location: ../loginPage.php");
 	exit();
 }else{
 	//denided
 	header("Location: ../registration.html");
-	exit();
+	
 }
