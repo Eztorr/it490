@@ -21,14 +21,22 @@ echo "successfully connected to database".PHP_EOL;
 function doLogin($email,$password)
 {
     global $mydb;
-    $query = "select id, email, password from Users where Users.email='$email';";
-    $response = $mydb->query($query);
+    $query = "select id, email, password from Users where Users.email= ?;";
+    $stmt = $mydb->prepare($query);
+    if ($stmt === false) {
+        echo "Failed to prepare statement: " . $mydb->error . PHP_EOL;
+        return array("returnCode" => "2", "message" => "Failed to prepare statement");
+    }
 
-    if ($mydb->errno != 0)
+    $stmt->bind_param('s', $email);  
+    $stmt->execute();
+    $response = $stmt->get_result();
+
+    if ($stmt->errno != 0)
 {
 	echo "failed to execute query:".PHP_EOL;
 	echo __FILE__.':'.__LINE__.":error: ".$mydb->error.PHP_EOL;
-	return array("status" => "error");
+	return array("returnCode" => "2", "message" => "db error");
 }
 
      if ($response && $response->num_rows > 0) 
@@ -36,14 +44,16 @@ function doLogin($email,$password)
         $row = $response->fetch_assoc();
 	
         
-        if ($password === $row['password']) 
+        if (password_verify($password, $row['password'])) 
 	{
 	    $token = bin2hex(random_bytes(32));
 	    $expiration_date = date("Y-m-d H:i:s", strtotime("+1 hour"));
 	    $user_id = $row['id'];
 
-	    $query = "INSERT INTO Sessions (user_id, session_token, expires) VALUES ('$user_id', '$token', '$expiration_date') ON DUPLICATE KEY UPDATE session_token = '$token', expires = '$expiration_date';";
-	    $mydb->query($query);
+	    $query = "INSERT INTO Sessions (user_id, session_token, expires) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE session_token = ?, expires = ?;";
+	    $stmt = $mydb->prepare($query);
+	    $stmt->bind_param('issss', $user_id, $token, $expiration_date, $token, $expiration_date);  
+    	    $stmt->execute();
             return array("returnCode" => "1", "message" => "Login successful", "token" => "$token");
         }
     }
@@ -56,21 +66,26 @@ function doRegister($email, $password)
 
     global $mydb;
    
-    $query = "SELECT email FROM Users WHERE email = '$email'";
-    $response = $mydb->query($query);
+    $query = "SELECT email FROM Users WHERE email = ?";
+    $stmt = $mydb->prepare($query);
+    $stmt->bind_param('s', $email);
+    $stmt->execute();
+    $response = $stmt->get_result();
    
        if ($response && $response->num_rows > 0) {
-        return array("status" => "error", "message" => "user already exists");
+        return array("returnCode" => "0", "message" => "user already exists");
     }
    
-   
-    $query = "insert into Users (email, password) values ('$email', '$password');";
-    $mydb->query($query);
-    if ($mydb->errno != 0)
+    $passwordHash = password_hash($password, PASSWORD_BCRYPT); 
+    $query = "insert into Users (email, password) values (?, ?);";
+    $stmt = $mydb->prepare($query);
+    $stmt->bind_param('ss', $email, $passwordHash);
+    $stmt->execute();
+    if ($stmt->errno != 0)
 {
         echo "failed to execute query:".PHP_EOL;
         echo __FILE__.':'.__LINE__.":error: ".$mydb->error.PHP_EOL;
-        return array("status" => "error", "message" => "error");
+        return array("returnCode" => "2", "message" => "db error");
     }
 
     return array("returnCode" => "1", "message" => "successful registration");
@@ -79,15 +94,17 @@ function doRegister($email, $password)
     function doValidate($sessionID)   
   {
 	 global $mydb;
-	 $sessionID = $mydb->real_escape_string($sessionID);
-	$query = "SELECT * FROM Sessions WHERE session_token ='$sessionID'";
-	$response = $mydb->query($query);
+	 $query = "SELECT * FROM Sessions WHERE session_token = ?";
+	 $stmt = $mydb->prepare($query);
+         $stmt->bind_param('s', $sessionID);
+         $stmt->execute();
+         $response = $stmt->get_result();
 
 	 if ($mydb->errno != 0)
 {
             echo "failed to execute query:".PHP_EOL;
             echo __FILE__.':'.__LINE__.":error: ".$mydb->error.PHP_EOL;
-	    return array("returnCode" => 0, "message" => "db error /session not valid");
+	    return array("returnCode" => 2, "message" => "db error /session not valid");
 	 }
 
 	       if ($response && $response->num_rows > 0) {
@@ -100,11 +117,12 @@ function doRegister($email, $password)
 function deleteSession($sessionID)
 {
 	global $mydb;
-	$sessionID = $mydb->real_escape_string($sessionID);
-	$query = "DELETE FROM Sessions WHERE session_token = '$sessionID'";
-	$result = $mydb ->query($query);
+	$query = "DELETE FROM Sessions WHERE session_token = ?";
+	$stmt = $mydb->prepare($query);
+	$stmt->bind_param('s', $sessionID);
+        $stmt->execute();
 
-	if ($mydb->errno != 0)
+	if ($stmt->errno != 0)
 	{
 		echo "failed to execute query:".PHP_EOL;
 		echo __FILE__.':'.__LINE__.":error: ".$mydb->error.php_EOL;
