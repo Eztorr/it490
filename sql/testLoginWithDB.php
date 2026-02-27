@@ -29,15 +29,15 @@ function doLogin($email,$password)
     }
 
     $stmt->bind_param('s', $email);  
-    $stmt->execute();
-    $response = $stmt->get_result();
 
-    if ($stmt->errno != 0)
+    if (!$stmt->execute())
 {
 	echo "failed to execute query:".PHP_EOL;
 	echo __FILE__.':'.__LINE__.":error: ".$mydb->error.PHP_EOL;
 	return array("returnCode" => "2", "message" => "db error");
-}
+    }
+     $response = $stmt->get_result();
+
 
      if ($response && $response->num_rows > 0) 
     {
@@ -80,8 +80,7 @@ function doRegister($email, $password)
     $query = "insert into Users (email, password) values (?, ?);";
     $stmt = $mydb->prepare($query);
     $stmt->bind_param('ss', $email, $passwordHash);
-    $stmt->execute();
-    if ($stmt->errno != 0)
+    if (!$stmt->execute())
 {
         echo "failed to execute query:".PHP_EOL;
         echo __FILE__.':'.__LINE__.":error: ".$mydb->error.PHP_EOL;
@@ -94,22 +93,33 @@ function doRegister($email, $password)
     function doValidate($sessionID)   
   {
 	 global $mydb;
-	 $query = "SELECT * FROM Sessions WHERE session_token = ?";
+	 $query = "SELECT * FROM Sessions WHERE session_token = ? AND expires > NOW()";
 	 $stmt = $mydb->prepare($query);
          $stmt->bind_param('s', $sessionID);
-         $stmt->execute();
-         $response = $stmt->get_result();
 
-	 if ($mydb->errno != 0)
+	 if (!$stmt->execute())
 {
             echo "failed to execute query:".PHP_EOL;
             echo __FILE__.':'.__LINE__.":error: ".$mydb->error.PHP_EOL;
 	    return array("returnCode" => 2, "message" => "db error /session not valid");
 	 }
+	 $response = $stmt->get_result();
 
-	       if ($response && $response->num_rows > 0) {
+	 if ($response && $response->num_rows > 0) {	
+	 $stmt->close();
+	 $expiration_date = date("Y-m-d H:i:s", strtotime("+1 hour"));
+	 $query = "UPDATE Sessions SET expires = ? WHERE session_token = ?";
+         $stmt = $mydb->prepare($query);
+         $stmt->bind_param('ss', $expiration_date, $sessionID);
+	 if (!$stmt->execute()) {
+   		 return ["returnCode" => 2, "message" => "failed to update expiration"];
+}
         return array("returnCode" => 1, "message" => "valid session");
-    }
+	 }
+	$query = "DELETE FROM Sessions WHERE session_token = ?";
+        $stmt = $mydb->prepare($query);
+        $stmt->bind_param('s', $sessionID);
+        $stmt->execute();
 
 	return array("returnCode" => 0, "message" => "invalid session");
     
@@ -122,7 +132,7 @@ function deleteSession($sessionID)
 	$stmt->bind_param('s', $sessionID);
         $stmt->execute();
 
-	if ($stmt->errno != 0)
+	if (!$stmt->execute())
 	{
 		echo "failed to execute query:".PHP_EOL;
 		echo __FILE__.':'.__LINE__.":error: ".$mydb->error.php_EOL;
