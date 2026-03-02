@@ -6,12 +6,11 @@ error_reporting(E_ALL);
 require_once('path.inc');
 require_once('get_host_info.inc');
 require_once('rabbitMQLib.inc');
+require_once('phpValidation.php');
 
-$email = isset($_POST['email']) ? trim($_POST['email']) : '';
-$password = isset($_POST['password']) ? trim($_POST['password']) : '';
-
-if (empty($email) || empty($password)) {
-	$_SESSION["error"] = "Pretty please enter both email and password.";
+$error = validateLogin();
+if ($error != "") {
+	$_SESSION["error"] = $error;
 	header("Location: /loginPage.php");
 	exit();
 }

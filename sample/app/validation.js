@@ -24,7 +24,6 @@ form.addEventListener('submit', function (event) {
 function validateInput(){
 	//clear 
         //get user input
-        event.preventDefault();
         const emailInput = document.getElementById("email").value;
         const passwordInput = document.getElementById("password").value;
 

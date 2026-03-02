@@ -1,13 +1,39 @@
 <?php 
-function validateLogin ($email, $password) {
-    if ($email === "" && $password === "") {
-        return "Please enter both email and password.";
-    } 
+function test_input($data) {
+    $data = trim($data);
+    $data = stripslashes($data);
+    $data = htmlspecialchars($data);
+    return $data;
+}
+function validateLogin()
+{
+    $emailError="";
+    $passwordError="";
 
-    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        return "Invalid email format.";
+    if(empty($_POST["email"])){
+        $emailError = "Please enter your email.";
+    } else {
+        $email = test_input($_POST["email"]);
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $emailError = "Invalid email format.";
             //https://www.w3schools.com/php/php_form_url_email.asp
         }
-         return "";
     }
+
+    if(empty($_POST["password"])){
+        $passwordError = "Please enter your password.";
+    } else {
+        $password = test_input($_POST["password"]);
+        if (!preg_match("/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/", $password)) 
+        {
+            $passwordError = "Password is invalid.";
+        }
+    }
+    if ($emailError != "")
+        return $emailError;
+    if ($passwordError != "")        
+        return $passwordError;
+    return "";
+}
+
    
