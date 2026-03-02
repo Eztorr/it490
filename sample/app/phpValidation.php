@@ -20,7 +20,7 @@ function validateLogin()
         }
     }
 
-    if(empty($_POST["password"])){
+    /* if(empty($_POST["password"])){
         $passwordError = "Please enter your password.";
     } else {
         $password = test_input($_POST["password"]);
@@ -29,11 +29,11 @@ function validateLogin()
         {
             $passwordError = "Password is invalid.";
         }
-    }
+    } */
     if ($emailError != "")
         return $emailError;
-    if ($passwordError != "")        
-        return $passwordError;
+    //if ($passwordError != "")        
+    //    return $passwordError;
     return "";
 }
 
