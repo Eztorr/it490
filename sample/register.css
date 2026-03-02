@@ -4,17 +4,21 @@ h1 {
 
 .signUp {
 	margin: auto;
-	width: 50%;
+	width: 40%;
 	border: 3px solid;
 	padding: 15px;
 }
 
 input {
 	width: 95%;
-	padding: 5px;
+	padding: 10px;
 }
 
 button[type=submit]{
 	margin: auto;
 	padding: 5px;
+}
+
+form #errorMsg{
+	color: red;
 }
