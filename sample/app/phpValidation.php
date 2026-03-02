@@ -24,7 +24,8 @@ function validateLogin()
         $passwordError = "Please enter your password.";
     } else {
         $password = test_input($_POST["password"]);
-        if (!preg_match("/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/", $password)) 
+        if(!preg_match("/^([a-zA-Z0-9._%-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6})/", $password))
+        //if (!preg_match("/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/", $password)) 
         {
             $passwordError = "Password is invalid.";
         }
