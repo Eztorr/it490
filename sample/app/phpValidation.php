@@ -15,25 +15,25 @@ function validateLogin()
     } else {
         $email = test_input($_POST["email"]);
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            $emailError = "Invalid email format.";
+            $emailError = "Email or password is invalid";
             //https://www.w3schools.com/php/php_form_url_email.asp
         }
     }
 
-    /* if(empty($_POST["password"])){
+    if(empty($_POST["password"])){
         $passwordError = "Please enter your password.";
     } else {
         $password = test_input($_POST["password"]);
         if(!preg_match("/^([a-zA-Z0-9._%-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6})/", $password))
         //if (!preg_match("/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/", $password)) 
         {
-            $passwordError = "Password is invalid.";
+            $passwordError = "Email or password is invalid.";
         }
-    } */
+    }
     if ($emailError != "")
         return $emailError;
-    //if ($passwordError != "")        
-    //    return $passwordError;
+    if ($passwordError != "")        
+       return $passwordError;
     return "";
 }
 
