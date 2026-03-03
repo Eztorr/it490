@@ -28,7 +28,6 @@ if (isset($_SESSION["error"])){
     <div class = "signUp">
     <p> Don't Have an Account? Sign Up Here! <a href = "registration.html"> Sign Up </a><p>
     </div>
-    <script src="/app/validation.js"></script> 
 </body>
 
 </html>

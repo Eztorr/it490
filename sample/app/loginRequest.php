@@ -15,6 +15,8 @@ if ($error != "") {
 	exit();
 }
 
+$email = trim($_POST['email']);
+$password = trim($_POST['password']);
 $client = new rabbitMQClient("testRabbitMQ.ini","testServer");
 /*
 if (isset($argv[1]))

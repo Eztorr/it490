@@ -11,7 +11,7 @@ function validateLogin()
     $passwordError="";
 
     if(empty($_POST["email"])){
-        $emailError = "Please enter your email.";
+        $emailError = "Please enter an email or password.";
     } else {
         $email = test_input($_POST["email"]);
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
@@ -19,14 +19,13 @@ function validateLogin()
             //https://www.w3schools.com/php/php_form_url_email.asp
         }
     }
-
+    //password validation
     if(empty($_POST["password"])){
         $passwordError = "Please enter your password.";
     } else {
-        $password = test_input($_POST["password"]);
-        if(!preg_match("/^([a-zA-Z0-9._%-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6})/", $password))
-        //if (!preg_match("/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/", $password)) 
-        {
+        $password = (string)$_POST["password"];
+        $passwordRegex = "/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/";
+        if (!preg_match($passwordRegex, $password)) {
             $passwordError = "Email or password is invalid.";
         }
     }
@@ -35,6 +34,6 @@ function validateLogin()
     if ($passwordError != "")        
        return $passwordError;
     return "";
-}
+}  
 
    
