@@ -9,7 +9,7 @@
 
 <?php
 $searchInput ="";
-if($_SERVER["REQUEST_METHOD"] == "POST" ){
+if($_SERVER["REQUEST_METHOD"] == "POST" && $_POST["search"] !="" ){
 	if(isset($_POST["search"])){
 		$searchInput = $_POST["search"];
 
