@@ -30,7 +30,7 @@ echo "<br>";
 echo "<label>Enter Full Review Here:</label>";
 echo "<br>";
 //echo "<input type='text' name='reviewText' style='width: 700px; height: 250px;'>";
-echo "<textarea name='userReview' rows='30' cols='100'></textarea>";
+echo "<textarea name='reviewText' rows='30' cols='100'></textarea>";
 
 echo "<br>";
 

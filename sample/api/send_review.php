@@ -12,10 +12,14 @@ if (!isset($_SESSION['token']) || empty($_SESSION['token']))
         exit();
 }
 
+if(!isset($_POST['name'])){
+	header("Location: /api/listGames.php");
+	exit();
+}
 
 $game_name = trim($_POST['name']);
 $genre = trim($_POST['genre']);
-$release = trim($_POST['release']);
+$release = trim($_POST['released']);
 $user_id = trim($_SESSION['user_id']);
 $rating = trim($_POST['reviewScore']);
 $reviewText = trim($_POST['reviewText']);
