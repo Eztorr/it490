@@ -175,7 +175,7 @@ function newReview($user_id, $game, $rating, $reviewText, $genre, $release){
 
 	$query = "INSERT INTO User_Reviews (user_id, game_id, rating, text) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE rating = ?, text = ?;";
         $stmt = $mydb->prepare($query);
-        $stmt->bind_param('siisis', $game, $row['game_id'], $rating, $reviewText, $rating, $reviewText);
+        $stmt->bind_param('iiisis', $user_id, $row['game_id'], $rating, $reviewText, $rating, $reviewText);
         if (!$stmt->execute())
         {
                 echo "failed to execute query:".PHP_EOL;
