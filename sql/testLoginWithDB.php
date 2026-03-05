@@ -479,7 +479,7 @@ function requestProcessor($request)
      case "delete_session":
 	     return deleteSession($request['token']);
      case "new_review":
-	     return addReview($request['user_id'], $request['game'], $request['rating'], $request['reviewText'], $request['genre'], $request['release_date']);
+	     return newReview($request['user_id'], $request['game'], $request['rating'], $request['reviewText'], $request['genre'], $request['release_date']);
      case "private":
 	     return handlePrivate($request['user_id'], $request['game']);
      case "get_user_reviews":
