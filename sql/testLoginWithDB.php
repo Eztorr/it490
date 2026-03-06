@@ -460,7 +460,7 @@ function getFollowStatus($user_id, $follow_id){
 function getRecommendations($user_id){
 
 	 global $mydb;
-         $query = "SELECT genre, AVG(rating) FROM Users_Reviews WHERE user_id = ? GROUP BY genre HAVING AVG(rating) > 75";
+         $query = "SELECT Games.genre, AVG(User_Reviews.rating) FROM User_Reviews JOIN Games ON User_Reviews.game_id = Games.game_id WHERE User_Reviews.user_id = ? GROUP BY Games.genre HAVING AVG(User_Reviews.rating) > 75";
          $stmt = $mydb->prepare($query);
          $stmt->bind_param('i', $user_id);
 
@@ -483,7 +483,7 @@ function getRecommendations($user_id){
 
 	 if(count($genres) == 0){
 
-        	$query = "SELECT genre, AVG(rating) AS avg_rating FROM Users_Reviews WHERE user_id = ? GROUP BY genre ORDER BY avg_rating DESC LIMIT 3";
+        	$query = "SELECT Games.genre, AVG(User_Reviews.rating) AS avg_rating FROM User_Reviews JOIN Games ON User_Reviews.game_id = Games.game_id WHERE User_Reviews.user_id = ? GROUP BY Games.genre ORDER BY avg_rating DESC LIMIT 3";
 
         $stmt = $mydb->prepare($query);
         $stmt->bind_param('i', $user_id);
@@ -546,7 +546,7 @@ function requestProcessor($request)
      case "get_follow_status":
              return getFollowStatus($request['user_id'], $request['follow_id']);
      case "get_recommendations":
-             return getRecommendations($request['user_id'];
+             return getRecommendations($request['user_id']);
 
 
 
