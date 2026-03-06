@@ -33,14 +33,14 @@ echo "<form action='send_review.php' method='POST'>";
 
 echo "<label>Enter review score (1-100):</label>";
 echo "<br>";
-echo "<input type='number' name='reviewScore'>";
+echo "<input type='number' name='reviewScore' min='1' max='100' required>";
 
 echo "<br>";
 
 echo "<label>Enter Full Review Here:</label>";
 echo "<br>";
 //echo "<input type='text' name='reviewText' style='width: 700px; height: 250px;'>";
-echo "<textarea name='reviewText' rows='30' cols='100'></textarea>";
+echo "<textarea name='reviewText' rows='30' cols='100' maxlength='5000' required></textarea>";
 
 echo "<br>";
 

@@ -10,7 +10,9 @@ if (!isset($_SESSION['token']) || empty($_SESSION['token']))
 if (isset($_SESSION['message']))
 {
         $message = $_SESSION['message'];
-        echo "<p>$message</p>"; 
+	echo "<p>$message</p>";
+        unset($_SESSION['message']);
+	unset($message);	
 }
 
 ?>
@@ -80,6 +82,10 @@ if($_SERVER["REQUEST_METHOD"] == "POST" && $_POST["search"] !="" )
 	
 	echo "Released: " . htmlspecialchars($game['released']) . " | ";
 	$released =  htmlspecialchars($game['released']); 
+	
+	if($released = ""){
+		$released = "N/A";
+	}
 
 	echo "Genres: ";
 	$mainGenre = "N/A";
