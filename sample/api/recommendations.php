@@ -1,42 +1,36 @@
 <?php
 session_start();
+require_once('../app/path.inc');
+require_once('../app/get_host_info.inc');
+require_once('../app/rabbitMQLib.inc');
+require_once('../app/phpValidation.php');
 require_once('../app/validateSession.php');
+
 if (!isset($_SESSION['token']) || empty($_SESSION['token']))
 {
-	header("Location: /loginPage.php");
-	exit();
+        header("Location: /loginPage.php");
+        exit();
 }
 
-if (isset($_SESSION['message']))
-{
-        $message = $_SESSION['message'];
-	echo "<p>$message</p>";
-        unset($_SESSION['message']);
-	unset($message);	
-}
+$user_id = trim($_SESSION['user_id']);
 
-?>
 
-<!DOCTYPE html>
+$client = new rabbitMQClient("testRabbitMQ.ini","testServer");
 
-<html>
-<form action="<?php echo ($_SERVER["PHP_SELF"])?>" method="POST">
-                <label>Search</label>
-                <input type="search" name="search">
-                <input type="submit">
-        </form>
-</html>
+$request = array();
+$request ['type'] = "get_recommendations";
+$request ['user_id'] = $user_id;
 
-<?php
-$searchInput ="";
-print_r($_POST);
-if($_SERVER["REQUEST_METHOD"] == "POST" && $_POST["search"] !="" )
-{
-	if(isset($_POST["search"])){
-		
-		$searchInput = urlencode($_POST["search"]);
-	}
-	
+
+
+$response = $client->send_request($request);
+
+if (empty($response['genres'])){
+
+	echo" <p>You have not reviewed enough games for recommendations </p>";
+
+}else{
+	print_r($response['genres']);
 	$env = parse_ini_file(__DIR__ . '/.env');
 
 	if (!$env || !isset($env['RAWG_API_KEY'])) {
@@ -45,7 +39,15 @@ if($_SERVER["REQUEST_METHOD"] == "POST" && $_POST["search"] !="" )
 
 	$apiKey = $env['RAWG_API_KEY'];
 
-	$url = "https://api.rawg.io/api/games?key=$apiKey&search=$searchInput&page_size=30";
+	 $genreSlugs = array_map(function($genre){
+        return strtolower(str_replace(' ', '-', $genre));
+         }, $response['genres']);
+
+   
+        $genreParam = implode(',', $genreSlugs);
+
+   
+        $url = "https://api.rawg.io/api/games?key=$apiKey&genres=$genreParam&page_size=100&ordering=-rating";
 
 	$ch = curl_init();
 
@@ -53,7 +55,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST" && $_POST["search"] !="" )
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 	curl_setopt($ch, CURLOPT_HTTPGET, true);
 
-	$response = curl_exec($ch);
+	$responseCurl = curl_exec($ch);
 
 	if (curl_errno($ch)) {
     		echo "cURL Error: " . curl_error($ch);
@@ -62,15 +64,21 @@ if($_SERVER["REQUEST_METHOD"] == "POST" && $_POST["search"] !="" )
 	}
 
 	curl_close($ch);
-
-	$data = json_decode($response, true);
+        
+	$data = json_decode($responseCurl, true);
 
 	if (!$data) {
 		
     		die("Error decoding JSON response.");
 	}
 
-	echo "<h2>Video Game List:</h2>";
+	
+
+	
+
+
+
+	echo "<h2>Video Game Recommendations:</h2>";
 	echo "<ul>";
 
 	foreach ($data['results'] as $game) {
@@ -116,5 +124,10 @@ if($_SERVER["REQUEST_METHOD"] == "POST" && $_POST["search"] !="" )
     	echo "</li>";
 }	
 
+
+
+
+
+
+
 }
-?>
