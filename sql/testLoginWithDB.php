@@ -444,7 +444,7 @@ function getFollowStatus($user_id, $follow_id){
 {
             echo "failed to execute query:".PHP_EOL;
             echo __FILE__.':'.__LINE__.":error: ".$mydb->error.PHP_EOL;
-            return array("returnCode" => 2, "message" => "db error /session not valid");
+            return array("returnCode" => 2, "message" => "db error");
          }
          $response = $stmt->get_result();
          if ($response && $response->num_rows > 0) {
@@ -456,6 +456,57 @@ function getFollowStatus($user_id, $follow_id){
          return array("returnCode" => "0", "message" => "Not following");
 
 } 
+
+function getRecommendations($user_id){
+
+	 global $mydb;
+         $query = "SELECT genre, AVG(rating) FROM Users_Reviews WHERE user_id = ? GROUP BY genre HAVING AVG(rating) > 75";
+         $stmt = $mydb->prepare($query);
+         $stmt->bind_param('i', $user_id);
+
+         if (!$stmt->execute())
+{
+            echo "failed to execute query:".PHP_EOL;
+            echo __FILE__.':'.__LINE__.":error: ".$mydb->error.PHP_EOL;
+            return array("returnCode" => 2, "message" => "db error");
+	 }
+
+	 $response = $stmt->get_result();
+
+	 $genres = array();
+
+    	 while($row = $response->fetch_assoc()){
+         $genres[] = $row['genre'];
+	 }
+
+	 $stmt->close();
+
+	 if(count($genres) == 0){
+
+        	$query = "SELECT genre, AVG(rating) AS avg_rating FROM Users_Reviews WHERE user_id = ? GROUP BY genre ORDER BY avg_rating DESC LIMIT 3";
+
+        $stmt = $mydb->prepare($query);
+        $stmt->bind_param('i', $user_id);
+
+        if (!$stmt->execute()){
+            echo "failed to execute query:".PHP_EOL;
+            echo __FILE__.':'.__LINE__.":error: ".$mydb->error.PHP_EOL;
+            return array("returnCode" => 2, "message" => "db error /session not valid");
+        }
+
+        $response = $stmt->get_result();
+
+        while($row = $response->fetch_assoc()){
+            $genres[] = $row['genre'];
+        }
+    }
+	 
+	 
+	 return array("returnCode" => 1, "genres" => $genres);
+	 
+
+
+}
 
 
 
@@ -494,7 +545,8 @@ function requestProcessor($request)
 	     return getProfileInfo($request['user_id']);
      case "get_follow_status":
              return getFollowStatus($request['user_id'], $request['follow_id']);
-
+     case "get_recommendations":
+             return getRecommendations($request['user_id'];
 
 
 
