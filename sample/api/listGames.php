@@ -1,4 +1,22 @@
+<?php
+session_start();
+require_once('../app/validateSession.php');
+if (!isset($_SESSION['token']) || empty($_SESSION['token']))
+{
+	header("Location: /loginPage.php");
+	exit();
+}
+
+if (isset($_SESSION['message']))
+{
+        $message = $_SESSION['message'];
+        echo "<p>$message</p>"; 
+}
+
+?>
+
 <!DOCTYPE html>
+
 <html>
 <form action="<?php echo ($_SERVER["PHP_SELF"])?>" method="POST">
                 <label>Search</label>

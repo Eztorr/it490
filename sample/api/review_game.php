@@ -1,5 +1,15 @@
 <?php
 
+session_start();
+require_once('../app/validateSession.php');
+if (!isset($_SESSION['token']) || empty($_SESSION['token']))
+{
+	header("Location: /loginPage.php");
+	exit();
+}
+
+
+
 if(!isset($_POST['name'])){
 	header("Location: /api/listGames.php");
 	exit();

@@ -40,7 +40,7 @@ $request ['release_date'] = $release;
 $response = $client->send_request($request);
 
 if (isset($response['returnCode']) && (int)$response['returnCode'] === 1){
-        //for now this is success 
+        $_SESSION["message"] = "You have sucessfully reviewed " . $request['game'];
         header ("Location: /api/listGames.php");
         exit();
 }
