@@ -85,8 +85,10 @@ if (empty($response['genres'])){
 
     	echo "<li>";
 	
-	echo htmlspecialchars($game['name']) . " | ";
+	
 	$name = htmlspecialchars($game['name']); 
+	$game_id = $game['id'];
+	echo "<a href='view_game.php?game_id=" . urlencode($game_id) . "'>$name</a> | ";
 	
 	echo "Released: " . htmlspecialchars($game['released']) . " | ";
 	$released =  htmlspecialchars($game['released']); 

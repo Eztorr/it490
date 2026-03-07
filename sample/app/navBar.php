@@ -9,7 +9,8 @@ if (session_status() == PHP_SESSION_NONE) {
     <nav class="navbar">
         <ul class="nav-list">
             <li><a href="/index.php">Home</a></li>
-            <li><a href="/api/listGames.php">Search Games</a></li>
+	    <li><a href="/api/listGames.php">Search Games</a></li>
+	    <li><a href="/api/recommendations.php">Your Recommended</a></li>
         </ul>
         <ul class = "nav-menu">
 <!-- session is up and user_id exists 

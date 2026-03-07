@@ -23,21 +23,16 @@ if (isset($_SESSION['message']))
 <!DOCTYPE html>
 
 <html>
-<form action="<?php echo ($_SERVER["PHP_SELF"])?>" method="POST">
-                <label>Search</label>
-                <input type="search" name="search">
-                <input type="submit">
-        </form>
+
 </html>
 
 <?php
 $searchInput ="";
-print_r($_POST);
-if($_SERVER["REQUEST_METHOD"] == "POST" && $_POST["search"] !="" )
+if($_SERVER["REQUEST_METHOD"] == "GET" && $_GET["game_id"] !="" )
 {
-	if(isset($_POST["search"])){
+	if(isset($_GET["game_id"])){
 		
-		$searchInput = urlencode($_POST["search"]);
+		$game_id = urlencode($_GET["game_id"]);
 	}
 	
 	$env = parse_ini_file(__DIR__ . '/.env');
@@ -48,7 +43,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST" && $_POST["search"] !="" )
 
 	$apiKey = $env['RAWG_API_KEY'];
 
-	$url = "https://api.rawg.io/api/games?key=$apiKey&search=$searchInput&page_size=30";
+	$url = "https://api.rawg.io/api/games/$game_id?key=$apiKey";
 
 	$ch = curl_init();
 
@@ -66,23 +61,22 @@ if($_SERVER["REQUEST_METHOD"] == "POST" && $_POST["search"] !="" )
 
 	curl_close($ch);
 
-	$data = json_decode($response, true);
+	$game = json_decode($response, true);
 
-	if (!$data) {
+	if (!$game) {
 		
     		die("Error decoding JSON response.");
 	}
 
-	echo "<h2>Video Game List:</h2>";
+
 	echo "<ul>";
 
-	foreach ($data['results'] as $game) {
+	
 
     	echo "<li>";
 	
 	$name = htmlspecialchars($game['name']); 
-	$game_id = $game['id'];
-	echo "<a href='view_game.php?game_id=" . urlencode($game_id) . "'>$name</a> | ";
+	echo "$name | ";
 	
 	echo "Released: " . htmlspecialchars($game['released']) . " | ";
 	$released =  htmlspecialchars($game['released']); 
@@ -116,9 +110,38 @@ if($_SERVER["REQUEST_METHOD"] == "POST" && $_POST["search"] !="" )
     	echo "<input type='submit' value='Review Game'>";
 
     	echo "</form>";	
+	echo "<br>"; 
 
+
+	if (!empty($game['background_image'])) {
+    	$image = htmlspecialchars($game['background_image']);
+    	echo "<img src='$image' alt='$name' style='max-width:400px; display:block; margin-top:10px; margin-bottom:10px;'>";
+	}
+
+
+	if (!empty($game['description_raw'])) {
+    	$description = htmlspecialchars($game['description_raw']);
+    	echo "<p>$description</p>";
+	}
+
+
+	if (!empty($game['metacritic'])) {
+    	$metacritic = htmlspecialchars($game['metacritic']);
+    	echo "<p><strong>Metacritic:</strong> $metacritic</p>";
+	}
+
+
+	if (!empty($game['tags'])) {
+    	echo "<p><strong>Tags:</strong> ";
+    	$tagNames = [];
+    	foreach ($game['tags'] as $tag) {
+        	$tagNames[] = htmlspecialchars($tag['name']);
+    	}
+    	echo implode(", ", $tagNames);
+    	echo "</p>";
+	}		
     	echo "</li>";
-}	
+	
 
 }
 ?>
