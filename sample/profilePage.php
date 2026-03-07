@@ -41,8 +41,8 @@ if (isset($response ['array']) && is_array($response['array']))
            <?php else: ?>
                    <?php foreach ($reviews as $review): ?>
                        <div class="reviewCard">
-                           <strong>Game:</strong> <?php echo $review['game_name']; ?><br>
-                           <strong>Rating:</strong> <?php echo $review['rating']; ?>/10<br>
+                           <strong>Game:</strong> <?php echo $review['game']; ?><br>
+                           <strong>Rating:</strong> <?php echo $review['rating']; ?>/100<br>
                            <strong>Comment:</strong> <?php echo $review['text']; ?>
                            <strong>Date:</strong> <?php echo $review['created']; ?> </div>
                    <?php endforeach; ?>
