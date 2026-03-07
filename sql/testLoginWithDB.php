@@ -250,7 +250,7 @@ function handlePrivate($user_id, $game){
 function getReviews($user_id){
 
 	global $mydb;
-         $query = "SELECT * FROM User_Reviews WHERE user_id = ?";
+         $query = "SELECT * FROM User_Reviews Join Games ON User_Reviews.game_id = Games.game_id WHERE user_id = ?";
          $stmt = $mydb->prepare($query);
          $stmt->bind_param('i', $user_id);
 
@@ -379,13 +379,16 @@ function get_all_reviews($search){
             User_Reviews.game_id,
             User_Reviews.rating,
             User_Reviews.text,
-            User_Reviews.is_private
+	    User_Reviews.is_private
+	    Games.game AS game_name
         FROM 
             User_Reviews
         JOIN 
-            Users ON Users.id = User_Reviews.user_id
+	    Users ON Users.id = User_Reviews.user_id
+        JOIN 
+	    Games ON User_Reviews.game_id = Games.game_id
         WHERE 
-	    User_Reviews.game LIKE ?";
+	    Games.game LIKE ?";
 	
 	 $searchTerm = "%" . $search . "%";
     
