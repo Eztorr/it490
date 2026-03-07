@@ -1,5 +1,8 @@
 <?php
-session_start();
+if (session_status() == PHP_SESSION_NONE) {
+	session_start();
+}
+include_once(__DIR__ . '/../app/navBar.php'); 
 require_once('../app/validateSession.php');
 if (!isset($_SESSION['token']) || empty($_SESSION['token']))
 {
