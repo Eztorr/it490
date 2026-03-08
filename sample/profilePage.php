@@ -29,8 +29,9 @@ if (isset($_GET['user_id']) && !empty($_GET['user_id'])) {
 }
 
 $myAccount = ((int)$_SESSION['user_id'] === $profileID); //is this my account being viewed or another profile
-$request = ['type' => 'get_user_reviews',
-    'user_id' => $profileID
+$request = ['type' => 'get_profile_all',
+	'user_id' => $profileID,
+	'follow_id' => (int)$_SESSION['user_id']
 ];
 $response = $client->send_request($request);
 
@@ -42,18 +43,14 @@ if (isset($response ['array']) && is_array($response['array']))
     $reviews = [];
 }
 
-//$followStatus = false;
+$followStatus = false;
 
-//if (!$myAccount && $_SESSION['user_id'] != $profileID) { //if its not my account, then check if im following the profile or not because the issue is clicking profile href is checking if i followed myself 
-//    $followStatusRequest = [ 'type' => 'get_follow_status',
-//    'user_id' => (int)$_SESSION['user_id'],
-//    'follow_id' => $profileID //profile being viewed
-//    ];
-//    $followResponse = $client->send_request($followStatusRequest);
-//    if(isset($followResponse['returnCode']) && $followResponse['returnCode'] == '1'){
-//        $followStatus = true; //user follows the profile
-//    }
-//} 
+if (!$myAccount && $_SESSION['user_id'] != $profileID) { //if its not my account, then check if im following the profile or not because the issue is clicking profile href is checking if i followed myself 
+    
+    if(isset($followResponse['followCode']) && $followResponse['followCode'] == '1'){
+        $followStatus = true; //user follows the profile
+    }
+} 
 ?>
 
 <!DOCTYPE html>
