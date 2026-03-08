@@ -4,15 +4,33 @@
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
+//make sure youre logged in before profile page access 
+if (!isset($_SESSION['user_id']) || empty($_SESSION['user_id']))
+{
+    header("Location: /loginPage.php");
+    exit();
+}
+
 require_once(__DIR__ . '/app/path.inc');
 require_once(__DIR__ . '/app/get_host_info.inc');
 require_once(__DIR__ . '/app/rabbitMQLib.inc');
+require_once(__DIR__ . '/app/validateSession.php');
 
 $client = new rabbitMQClient("testRabbitMQ.ini","testServer");
-$userId = $_SESSION['user_id']; //get the userId from the person thats logged in 
+
+
+//$userId = $_SESSION['user_id']; //get the userId from the person thats logged in 
 //database request!! for the reviews
+// view another profile page if userid is in url, and if not, its their own page 
+if (isset($_GET['user_id']) && !empty($_GET['user_id'])) {
+    $profileID = (int)$_GET['user_id'];
+} else {
+    $profileID= (int)$_SESSION['user_id'];
+}
+
+$myAccount = ((int)$_SESSION['user_id'] === $profileID); //is this my account being viewed or another profile
 $request = ['type' => 'get_user_reviews',
-    'user_id' => $userId
+    'user_id' => $profileID
 ];
 $response = $client->send_request($request);
 
@@ -23,7 +41,21 @@ if (isset($response ['array']) && is_array($response['array']))
         } else {
     $reviews = [];
 }
+
+//$followStatus = false;
+
+//if (!$myAccount && $_SESSION['user_id'] != $profileID) { //if its not my account, then check if im following the profile or not because the issue is clicking profile href is checking if i followed myself 
+//    $followStatusRequest = [ 'type' => 'get_follow_status',
+//    'user_id' => (int)$_SESSION['user_id'],
+//    'follow_id' => $profileID //profile being viewed
+//    ];
+//    $followResponse = $client->send_request($followStatusRequest);
+//    if(isset($followResponse['returnCode']) && $followResponse['returnCode'] == '1'){
+//        $followStatus = true; //user follows the profile
+//    }
+//} 
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -33,8 +65,27 @@ if (isset($response ['array']) && is_array($response['array']))
        </head>
        <body>
            <?php include_once(__DIR__ . '/app/navBar.php'); ?>
-           <h1> Profile </h1>
+           <h1> <?php if  ($myAccount): ?>
+                My Profile
+                <?php else: ?>
+                User Profile
+                <?php endif; ?>
+           </h1>
+           <p>viewing user id: <?php echo $profileID; ?></p>
+           <p> owner mode: <?php echo $myAccount ? '1' : '0'; ?></p>
+           <!--<p><strong>Email:</strong> <?php echo ($_SESSION['email']); ?></p>-->
+           <?php if ($myAccount): ?>
            <p><strong>Email:</strong> <?php echo ($_SESSION['email']); ?></p>
+           <?php else:?>
+            <!-- other profile would show follow button, but if mine, don't show it -->
+             <form method = "POST" action="/app/followUser.php">
+                <input type="hidden" name="follow_id" value="<?php echo $profileID; ?>">
+                <button type="submit"><?php echo $followStatus ? 'Unfollow' : 'Follow'; ?></button> 
+            </form>
+           <?php endif; ?>
+        <?php if ($myAccount): ?>
+              <p><strong>Username:</strong>Not implemented yet </p>
+           <?php endif; ?>
            <h2> Reviews </h2>
            <?php if (empty($reviews)): ?>
                <p>Your Reviews Will Appear Here When You Submit a Review!</p>
