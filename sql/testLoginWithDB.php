@@ -511,6 +511,50 @@ function getRecommendations($user_id){
 
 }
 
+function getProfileALL($user_id, $follow_id){
+
+        global $mydb;
+         $query = "SELECT * FROM User_Reviews Join Games ON User_Reviews.game_id = Games.game_id WHERE user_id = ?";
+         $stmt = $mydb->prepare($query);
+         $stmt->bind_param('i', $user_id);
+
+         if (!$stmt->execute())
+{
+            echo "failed to execute query:".PHP_EOL;
+            echo __FILE__.':'.__LINE__.":error: ".$mydb->error.PHP_EOL;
+            return array("returnCode" => 2, "message" => "db error /session not valid");
+         }
+         $response = $stmt->get_result();
+
+	 $all_rows = $response->fetch_all(MYSQLI_ASSOC);
+	 $stmt->close();
+
+
+         $query = "SELECT * FROM User_Following WHERE user_id = ? AND following_id = ?";
+         $stmt = $mydb->prepare($query);
+         $stmt->bind_param('ii', $user_id, $follow_id);
+
+         if (!$stmt->execute())
+{
+            echo "failed to execute query:".PHP_EOL;
+            echo __FILE__.':'.__LINE__.":error: ".$mydb->error.PHP_EOL;
+            return array("returnCode" => 2, "message" => "db error");
+         }
+         $response = $stmt->get_result();
+         if ($response && $response->num_rows > 0) {
+
+                $row = $response->fetch_assoc();
+                return array("returnCode" => "1", "followCode" => "1", "array" => $all_rows);
+         }
+
+         return array("returnCode" => "1", "followCode" => "0", "array" => $all_rows);
+
+}
+
+
+
+
+
 
 
 
@@ -550,7 +594,8 @@ function requestProcessor($request)
              return getFollowStatus($request['user_id'], $request['follow_id']);
      case "get_recommendations":
              return getRecommendations($request['user_id']);
-
+     case "get_profile_all":
+             return getProfileAll($request['user_id'], $request['follow_id']);
 
 
 
