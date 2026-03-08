@@ -368,7 +368,7 @@ function handleFollow($user_id, $follow_id){
 
 }
 
-function get_all_reviews($search){
+function getAll($search){
 	
 	global $mydb;
          $query = "
