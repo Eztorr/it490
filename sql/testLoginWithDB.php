@@ -192,6 +192,7 @@ function newReview($user_id, $game, $rating, $reviewText, $genre, $release){
 
 function handlePrivate($user_id, $game){
 	//gets game_id based on game name
+	global $mydb;
         $query = "SELECT game_id FROM Games WHERE game = ?";
         $stmt = $mydb->prepare($query);
         $stmt->bind_param('s', $game);
