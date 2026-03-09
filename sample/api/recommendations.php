@@ -5,6 +5,7 @@ require_once('../app/get_host_info.inc');
 require_once('../app/rabbitMQLib.inc');
 require_once('../app/phpValidation.php');
 require_once('../app/validateSession.php');
+include_once('../app/navBar.php');
 
 if (!isset($_SESSION['token']) || empty($_SESSION['token']))
 {
