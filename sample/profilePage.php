@@ -31,7 +31,7 @@ $viewerId = (int)$_SESSION['user_id']; //the person thats logged in and viewing 
 $myAccount = ((int)$_SESSION['user_id'] === $profileID); //is this my account being viewed or another profile
 $request = ['type' => 'get_profile_all',
 	'user_id' => $profileID,
-	'follow_id' => (int)$_SESSION['user_id'],
+	'follow_id' => $profileID,
     'viewer_id' => (int)$_SESSION['user_id']
 ];
 $response = $client->send_request($request);
@@ -48,7 +48,7 @@ $followStatus = false;
 
 if (!$myAccount && $_SESSION['user_id'] != $profileID) { //if its not my account, then check if im following the profile or not because the issue is clicking profile href is checking if i followed myself 
     
-    if(isset($followResponse['followCode']) && $followResponse['followCode'] == '1'){
+    if(isset($response['followCode']) && $response['followCode'] == '1'){
         $followStatus = true; //user follows the profile
     }
 } 
