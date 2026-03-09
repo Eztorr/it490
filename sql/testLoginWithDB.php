@@ -517,7 +517,7 @@ function getRecommendations($user_id){
 function getProfileALL($user_id, $follow_id, $viewer_id){
 
         global $mydb;
-	$query = "SELECT * FROM User_Reviews Join Games ON User_Reviews.game_id = Games.game_id WHERE User_Reviews.user_id = ?";
+	$query = "SELECT * FROM User_Reviews Join Games ON User_Reviews.game_id = Games.game_id Join Users ON User_Reviews.user_id = Users.email WHERE User_Reviews.user_id = ?";
 	if($viewer_id != $user_id){ $query .= " AND User_Reviews.is_private = 0"; }
          $stmt = $mydb->prepare($query);
          $stmt->bind_param('i', $user_id);
