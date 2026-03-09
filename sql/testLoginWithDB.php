@@ -536,7 +536,7 @@ function getProfileALL($user_id, $follow_id, $viewer_id){
 
          $query = "SELECT * FROM User_Following WHERE user_id = ? AND following_id = ?";
          $stmt = $mydb->prepare($query);
-         $stmt->bind_param('ii', $user_id, $follow_id);
+         $stmt->bind_param('ii', $viewer_id, $follow_id);
 
          if (!$stmt->execute())
 {
