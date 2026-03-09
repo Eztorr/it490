@@ -23,6 +23,7 @@ $release = trim($_POST['released']);
 $user_id = trim($_SESSION['user_id']);
 $rating = trim($_POST['reviewScore']);
 $reviewText = trim($_POST['reviewText']);
+$is_private = isset($_POST['is_private']) ? 1 : 0; //is it checked or not. Checked= 1 
 
 $client = new rabbitMQClient("testRabbitMQ.ini","testServer");
 
@@ -34,8 +35,7 @@ $request ['rating'] = $rating;
 $request ['reviewText'] = $reviewText;
 $request ['genre'] = $genre;
 $request ['release_date'] = $release;
-
-
+$request ['is_private'] = $is_private;
 
 $response = $client->send_request($request);
 

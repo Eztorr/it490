@@ -27,11 +27,12 @@ if (isset($_GET['user_id']) && !empty($_GET['user_id'])) {
 } else {
     $profileID= (int)$_SESSION['user_id'];
 }
-
+$viewerId = (int)$_SESSION['user_id']; //the person thats logged in and viewing the profile page, if its their own page, then viewerId and profileID are the same, if its another profile, then they are different
 $myAccount = ((int)$_SESSION['user_id'] === $profileID); //is this my account being viewed or another profile
 $request = ['type' => 'get_profile_all',
 	'user_id' => $profileID,
-	'follow_id' => (int)$_SESSION['user_id']
+	'follow_id' => (int)$_SESSION['user_id'],
+    'viewer_id' => (int)$_SESSION['user_id']
 ];
 $response = $client->send_request($request);
 
@@ -88,11 +89,28 @@ if (!$myAccount && $_SESSION['user_id'] != $profileID) { //if its not my account
                <p>Your Reviews Will Appear Here When You Submit a Review!</p>
            <?php else: ?>
                    <?php foreach ($reviews as $review): ?>
+                    <?php 
+                    if (!$myAccount && $review['is_private'] == 1) { continue;}//if its not my account and the review is private, then skip showing the review, if its my account, show all reviews including private ones 
+                    ?>
                        <div class="reviewCard">
                            <strong>Game:</strong> <?php echo $review['game']; ?><br>
                            <strong>Rating:</strong> <?php echo $review['rating']; ?>/100<br>
-                           <strong>Comment:</strong> <?php echo $review['text']; ?>
+                           <strong>Comment:</strong> <?php echo $review['text']; ?> <br>
                            <strong>Date:</strong> <?php echo $review['created']; ?> </div>
+
+                            <?php if ($myAccount && $review ['is_private'] == 1): ?>
+                            <em>This Review is Private</em>
+                            <?php endif; ?>
+
+                           <?php if ($myAccount): ?><!-- only show the button to make private or public if its my account, if its not my account, don't show the button -->
+                            <form method="POST" action="/app/makePrivateReview.php">
+                                <input type="hidden" name="game" value="<?php echo $review['game']; ?>">
+                                <!-- If text is private: "Make Public" and vice versa.  -->
+                                <button type="submit"><?php echo $review['is_private'] == 1 ? 'Make Public' : 'Make Private'; ?></button> 
+                            </form> 
+                            <?php endif; ?>
+
+                          
                    <?php endforeach; ?>
            <?php endif; ?>
        </body>

@@ -43,7 +43,8 @@ echo "<br>";
 echo "<textarea name='reviewText' rows='30' cols='100' maxlength='5000' required></textarea>";
 
 echo "<br>";
-
+echo "<input type='checkbox' name='is_private' value='1'> Make Review Private (Only visible to you.)</label>";
+echo "<br>";
 echo "<input type='submit' value='Submit Review'>";
 
 $name = $_POST['name'];
