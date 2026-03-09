@@ -4,7 +4,7 @@ require_once('path.inc');
 require_once('get_host_info.inc');
 require_once('rabbitMQLib.inc');
 
-$mydb = new mysqli('127.0.0.1','userInfo','TheBestPassword123!','data');
+$mydb = new mysqli('127.0.0.1','userInfo','theBestPassword','data');
 
 
 
@@ -517,7 +517,7 @@ function getRecommendations($user_id){
 function getProfileALL($user_id, $follow_id, $viewer_id){
 
         global $mydb;
-	$query = "SELECT * FROM User_Reviews Join Games ON User_Reviews.game_id = Games.game_id Join Users ON User_Reviews.user_id = Users.email WHERE User_Reviews.user_id = ?";
+	$query = "SELECT * FROM User_Reviews Join Games ON User_Reviews.game_id = Games.game_id Join Users ON User_Reviews.user_id = Users.id WHERE User_Reviews.user_id = ?";
 	if($viewer_id != $user_id){ $query .= " AND User_Reviews.is_private = 0"; }
          $stmt = $mydb->prepare($query);
          $stmt->bind_param('i', $user_id);
