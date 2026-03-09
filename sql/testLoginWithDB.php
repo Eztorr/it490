@@ -4,7 +4,7 @@ require_once('path.inc');
 require_once('get_host_info.inc');
 require_once('rabbitMQLib.inc');
 
-$mydb = new mysqli('127.0.0.1','userInfo','theBestPassword','data');
+$mydb = new mysqli('127.0.0.1','userInfo','TheBestPassword123!','data');
 
 
 
@@ -141,7 +141,7 @@ function deleteSession($sessionID)
 	return array ("returnCode" => 1, "message" => "session deleted/ logged out!!!");
 }
 
-function newReview($user_id, $game, $rating, $reviewText, $genre, $release){
+function newReview($user_id, $game, $rating, $reviewText, $genre, $release, $is_private){
 	global $mydb;
 	$query = "INSERT IGNORE INTO Games (game, genre, release_date) VALUES (?, ?, ?)";
 	$stmt = $mydb->prepare($query);
@@ -173,9 +173,9 @@ function newReview($user_id, $game, $rating, $reviewText, $genre, $release){
 
 	$stmt->close();
 
-	$query = "INSERT INTO User_Reviews (user_id, game_id, rating, text) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE rating = ?, text = ?;";
+	$query = "INSERT INTO User_Reviews (user_id, game_id, rating, text, is_private) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE rating = ?, text = ?, is_private = ? ;";
         $stmt = $mydb->prepare($query);
-        $stmt->bind_param('iiisis', $user_id, $row['game_id'], $rating, $reviewText, $rating, $reviewText);
+        $stmt->bind_param('iiisissi', $user_id, $row['game_id'], $rating, $reviewText, $is_private, $rating, $reviewText, $is_private);
         if (!$stmt->execute())
         {
                 echo "failed to execute query:".PHP_EOL;
@@ -190,7 +190,9 @@ function newReview($user_id, $game, $rating, $reviewText, $genre, $release){
 
 }
 
-function handlePrivate($user_id, $game){
+function handlePrivate($user_id, $game)
+{      
+	global $mydb;
 	//gets game_id based on game name
 	global $mydb;
         $query = "SELECT game_id FROM Games WHERE game = ?";
@@ -512,10 +514,11 @@ function getRecommendations($user_id){
 
 }
 
-function getProfileALL($user_id, $follow_id){
+function getProfileALL($user_id, $follow_id, $viewer_id){
 
         global $mydb;
-         $query = "SELECT * FROM User_Reviews Join Games ON User_Reviews.game_id = Games.game_id WHERE user_id = ?";
+	$query = "SELECT * FROM User_Reviews Join Games ON User_Reviews.game_id = Games.game_id WHERE User_Reviews.user_id = ?";
+	if($viewer_id != $user_id){ $query .= " AND User_Reviews.is_private = 0"; }
          $stmt = $mydb->prepare($query);
          $stmt->bind_param('i', $user_id);
 
@@ -578,7 +581,7 @@ function requestProcessor($request)
      case "delete_session":
 	     return deleteSession($request['token']);
      case "new_review":
-	     return newReview($request['user_id'], $request['game'], $request['rating'], $request['reviewText'], $request['genre'], $request['release_date']);
+	     return newReview($request['user_id'], $request['game'], $request['rating'], $request['reviewText'], $request['genre'], $request['release_date'],$request['is_private']);
      case "private":
 	     return handlePrivate($request['user_id'], $request['game']);
      case "get_user_reviews":
@@ -596,7 +599,7 @@ function requestProcessor($request)
      case "get_recommendations":
              return getRecommendations($request['user_id']);
      case "get_profile_all":
-             return getProfileAll($request['user_id'], $request['follow_id']);
+             return getProfileAll($request['user_id'], $request['follow_id'], $request['viewer_id']);
 
 
 
