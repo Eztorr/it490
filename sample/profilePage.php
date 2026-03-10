@@ -76,7 +76,7 @@ if (!$myAccount && $_SESSION['user_id'] != $profileID) { //if its not my account
            <?php if ($myAccount): ?>
            <p><strong>Email:</strong> <?php echo ($_SESSION['email']); ?></p>
 	   <?php else:?>
-	   <p><strong>Email:</strong> <?php echo ($reviews[0]['email']); ?></p>
+	   <p><strong>Email:</strong> <?php echo ($response['email']); ?></p>
             <!-- other profile would show follow button, but if mine, don't show it -->
              <form method = "POST" action="/app/followUser.php">
                 <input type="hidden" name="follow_id" value="<?php echo $profileID; ?>">
