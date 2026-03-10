@@ -43,23 +43,23 @@ if($_SERVER["REQUEST_METHOD"] == "GET" && $_GET["game_id"] !="" )
 
 	$apiKey = $env['RAWG_API_KEY'];
 
-	$url = "https://api.rawg.io/api/games/$game_id?key=$apiKey";
+	$rawgAPIurl = "https://api.rawg.io/api/games/$game_id?key=$apiKey";
 
-	$ch = curl_init();
+	$curl = curl_init();
 
-	curl_setopt($ch, CURLOPT_URL, $url);
-	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-	curl_setopt($ch, CURLOPT_HTTPGET, true);
+	curl_setopt($curl, CURLOPT_URL, $rawgAPIurl);
+	curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+	curl_setopt($curl, CURLOPT_HTTPGET, true);
 
-	$response = curl_exec($ch);
+	$response = curl_exec($curl);
 
-	if (curl_errno($ch)) {
-    		echo "cURL Error: " . curl_error($ch);
-    		curl_close($ch);
+	if (curl_errno($curl)) {
+    		echo "cURL Error: " . curl_error($curl);
+    		curl_close($curl);
     		exit;
 	}
 
-	curl_close($ch);
+	curl_close($curl);
 
 	$game = json_decode($response, true);
 
@@ -68,12 +68,11 @@ if($_SERVER["REQUEST_METHOD"] == "GET" && $_GET["game_id"] !="" )
     		die("Error decoding JSON response.");
 	}
 
-
-	echo "<ul>";
+echo "<ul>";
 
 	
 
-    	echo "<li>";
+    	  echo "<li>";
 	
 	$name = htmlspecialchars($game['name']); 
 	echo "$name | ";
@@ -97,7 +96,7 @@ if($_SERVER["REQUEST_METHOD"] == "GET" && $_GET["game_id"] !="" )
     	echo "| Platforms: ";
 
     	if (!empty($game['platforms'])) {
-        	foreach ($game['platforms'] as $platform) {
+        foreach ($game['platforms'] as $platform) {
             	echo htmlspecialchars($platform['platform']['name']) . " ";
         	}
 	}

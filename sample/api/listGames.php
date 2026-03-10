@@ -48,27 +48,27 @@ if($_SERVER["REQUEST_METHOD"] == "POST" && $_POST["search"] !="" )
 
 	$apiKey = $env['RAWG_API_KEY'];
 
-	$url = "https://api.rawg.io/api/games?key=$apiKey&search=$searchInput&page_size=30";
+	$rawgAPIurl = "https://api.rawg.io/api/games?key=$apiKey&search=$searchInput&page_size=30";
 
-	$ch = curl_init();
+	$curl = curl_init();
 
-	curl_setopt($ch, CURLOPT_URL, $url);
-	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-	curl_setopt($ch, CURLOPT_HTTPGET, true);
+	curl_setopt($curl, CURLOPT_URL, $rawgAPIurl);
+	curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+	curl_setopt($curl, CURLOPT_HTTPGET, true);
 
-	$response = curl_exec($ch);
+	$response = curl_exec($curl);
 
-	if (curl_errno($ch)) {
-    		echo "cURL Error: " . curl_error($ch);
-    		curl_close($ch);
+	if (curl_errno($curl)) {
+    		echo "cURL Error: " . curl_error($curl);
+    		curl_close($curl);
     		exit;
 	}
 
-	curl_close($ch);
+	curl_close($curl);
 
-	$data = json_decode($response, true);
+	$apiGameData = json_decode($response, true);
 
-	if (!$data) {
+	if (!$apiGameData) {
 		
     		die("Error decoding JSON response.");
 	}
@@ -76,10 +76,11 @@ if($_SERVER["REQUEST_METHOD"] == "POST" && $_POST["search"] !="" )
 	echo "<h2>Video Game List:</h2>";
 	echo "<ul>";
 
-	foreach ($data['results'] as $game) {
+	foreach ($apiGameData['results'] as $game) {
 
     	echo "<li>";
-	
+
+	//$dataName = $game['name'];
 	$name = htmlspecialchars($game['name']); 
 	$game_id = $game['id'];
 	echo "<a href='view_game.php?game_id=" . urlencode($game_id) . "'>$name</a> | ";

@@ -47,7 +47,7 @@ echo "<input type='checkbox' name='is_private' value='1'> Make Review Private (O
 echo "<br>";
 echo "<input type='submit' value='Submit Review'>";
 
-$name = $_POST['name'];
+$name = htmlspecialchars($_POST['name']);
 $genre = $_POST['genre'];
 $released = $_POST['released'];
 
