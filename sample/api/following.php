@@ -4,8 +4,8 @@ if (session_status() == PHP_SESSION_NONE) {
 }
 
 require_once('../app/validateSession.php');
-if (!isset($_SESSION['token'])) || empty($_SESSION['token'])) {
-    header("LOcation: /loginPage.php");
+if (!isset($_SESSION['token']) || empty($_SESSION['token'])) {
+    header("Location: /loginPage.php");
     exit();
 }
 
@@ -37,11 +37,11 @@ $response = getFollowedReviews();
         <title>Follower Feed</title>
 </head>
 <body>
-    <h1>Reviews from People You FOllow</h1>
+    <h1>Reviews from People You Follow</h1>
 
     <?php
-    if($response['returnCode'} ==1 && !empty($response['array'])){
-        foreach($response['array' as $review){
+    if($response['returnCode'] ==1 && !empty($response['array']))
+        foreach($response['array'] as $review){
             echo "div style='border-bottom: 1px solid #ccc; padding: 10px;'>";
             echo "<label>Game Name: </label>";
             echo "<strong>" . htmlspecialchars($review['game_name']). "</strong><br>";
