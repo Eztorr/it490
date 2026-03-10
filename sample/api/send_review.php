@@ -17,6 +17,9 @@ if(!isset($_POST['name'])){
 	exit();
 }
 
+
+
+
 $game_name = trim($_POST['name']);
 $genre = trim($_POST['genre']);
 $release = trim($_POST['released']);
@@ -24,6 +27,20 @@ $user_id = trim($_SESSION['user_id']);
 $rating = trim($_POST['reviewScore']);
 $reviewText = trim($_POST['reviewText']);
 $is_private = isset($_POST['is_private']) ? 1 : 0; //is it checked or not. Checked= 1 
+
+if ($rating > 100 || $rating < 0){
+        $_SESSION["message"] = "There was an error with your review: Please enter a review score between 1 and 100";
+        header ("Location: /api/listGames.php");
+        exit();
+}
+
+if (strlen($reviewText) > 500){
+        $_SESSION["message"] = "There was an error with your review: Please enter a review that is 5000 chars or less";
+        header ("Location: /api/listGames.php");
+        exit();
+}
+
+
 
 $client = new rabbitMQClient("testRabbitMQ.ini","testServer");
 

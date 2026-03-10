@@ -86,7 +86,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST" && $_POST["search"] !="" )
 	$game_id = $game['id'];
 	echo "<a href='view_game.php?game_id=" . urlencode($game_id) . "'>$name</a> || ";
 	
-	echo "Released: $release || ";
+	echo "Released: $released || ";
 	
 	if($released == ""){
 		$released = "N/A";
