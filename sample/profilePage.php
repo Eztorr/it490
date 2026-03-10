@@ -107,7 +107,7 @@ if (!$myAccount && $_SESSION['user_id'] != $profileID) { //if its not my account
                             <?php if ($myAccount && $review ['is_private'] == 1): ?>
                             <em>This Review is Private</em>
                             <?php endif; ?>
-
+				
                            <?php if ($myAccount): ?><!-- only show the button to make private or public if its my account, if its not my account, don't show the button -->
                             <form method="POST" action="/app/makePrivateReview.php">
                                 <input type="hidden" name="game" value="<?php echo $review['game']; ?>">
@@ -115,7 +115,7 @@ if (!$myAccount && $_SESSION['user_id'] != $profileID) { //if its not my account
                                 <button type="submit"><?php echo $review['is_private'] == 1 ? 'Make Public' : 'Make Private'; ?></button> 
                             </form> 
                             <?php endif; ?>
-
+<?php echo "<br>" ?>
                           
                    <?php endforeach; ?>
            <?php endif; ?>
