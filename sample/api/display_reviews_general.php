@@ -40,6 +40,7 @@ if($response['returnCode'] == 1 && !empty($response['array'])){
 		if($review['is_private'] == 1){
 			continue;
 		}
+		echo "<div style='border-bottom: 1px solid #ccc; padding: 10px;'>";
 		echo "<p>";
 		//review id?
 		//echo <label>Review ID: </label>;
@@ -68,19 +69,22 @@ if($response['returnCode'] == 1 && !empty($response['array'])){
 		echo "<br>";
 		//new line for actual review hide if its private
 		echo "<label>Review: </label>";
-		if($review['is_private'] == 0){
-			echo htmlspecialchars($review['text']);
-			$pubOrPriv = "Public";
-		}else{
-			echo "Cannot show private reviews";
-			$pubOrPriv = "Private";
+		//This logic is not needed because it should be displayed if public and not if private 
+		//if($review['is_private'] == 0){
+		//	echo htmlspecialchars($review['text']);
+//			$pubOrPriv = "Public";
+		//}else{
+		//	echo "Cannot show private reviews";
+		//	$pubOrPriv = "Private";
 
-		}
+	//	}
 		//bellow say if it private or not
+		echo htmlspecialchars($review['text']);
 		echo "<br>";
-		echo "<label>Public/Private: </label>";
-		echo "$pubOrPriv";
+		//echo "<label>Public/Private: </label>";
+		//echo "$pubOrPriv";
 		echo "</p>";
+		echo "</div>";
 	}
 }else{
 	echo "<p> no reviews found</p>";
