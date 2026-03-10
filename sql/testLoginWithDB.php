@@ -279,7 +279,6 @@ function getFollowedReviews($user_id){
         global $mydb;
         $query = "
         SELECT 
-            User_Reviews.review_id,
             User_Reviews.user_id AS reviewer_id,
             Users.email AS reviewer_email,
             User_Reviews.game_id,
