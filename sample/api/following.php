@@ -37,12 +37,16 @@ $response = getFollowedReviews();
         <title>Follower Feed</title>
 </head>
 <body>
+<?php include_once('../app/navBar.php'); ?>
     <h1>Reviews from People You Follow</h1>
 
-    <?php
+<?php
     if($response['returnCode'] ==1 && !empty($response['array']))
-        foreach($response['array'] as $review){
-            echo "div style='border-bottom: 1px solid #ccc; padding: 10px;'>";
+	    foreach($response['array'] as $review){
+		    if($review['is_private'] == 1){
+		    continue;
+		    }
+            echo "<div style='border-bottom: 1px solid #ccc; padding: 10px;'>";
             echo "<label>Game Name: </label>";
             echo "<strong>" . htmlspecialchars($review['game_name']). "</strong><br>";
 
@@ -50,15 +54,15 @@ $response = getFollowedReviews();
             $reviewerID = $review['reviewer_id'];
 
             echo "<label>Reviewer Email: </label>";
-            echo "<a href='#' onclick='alert(\"user ID: $reviewerID\"); return false;'>$reviewerEmail</a><br>";
+            echo "<a href='../profilePage.php?user_id=$reviewerID'>" . $reviewerEmail . "</a>";
 
-            echo "<label>Rating: </label>";
-            echo $review['rating'] . " / 5<br>";
+            echo "<label> Rating: </label>";
+            echo $review['rating'] . " /100<br>";
 
             echo "<label>Review: ";
 
-            if $review['is_private'] == 0){
-                echo htmlspecialchars($eview['text']);
+            if ($review['is_private'] == 0){
+                echo htmlspecialchars($review['text']);
             } else {
                 echo "<em>This review is private.</em>";
             }
