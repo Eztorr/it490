@@ -533,7 +533,22 @@ function getProfileALL($user_id, $follow_id, $viewer_id){
 
 	 $all_rows = $response->fetch_all(MYSQLI_ASSOC);
 	 $stmt->close();
+	
+ 	//this is here to get user email regardless of wether a review exisits or not	 
+	 $query = "SELECT email FROM Users WHERE id = ?";
+         $stmt = $mydb->prepare($query);
+         $stmt->bind_param('i', $user_id);
 
+         if (!$stmt->execute())
+{
+            echo "failed to execute query:".PHP_EOL;
+            echo __FILE__.':'.__LINE__.":error: ".$mydb->error.PHP_EOL;
+            return array("returnCode" => 2, "message" => "db error");
+	 }
+	 $response = $stmt->get_result();
+	 $row = $response->fetch_assoc();
+	 $email = $row['email'];
+	 $stmt->close();
 
          $query = "SELECT * FROM User_Following WHERE user_id = ? AND following_id = ?";
          $stmt = $mydb->prepare($query);
@@ -549,10 +564,10 @@ function getProfileALL($user_id, $follow_id, $viewer_id){
          if ($response && $response->num_rows > 0) {
 
                 $row = $response->fetch_assoc();
-                return array("returnCode" => "1", "followCode" => "1", "array" => $all_rows);
+                return array("returnCode" => "1", "followCode" => "1", "email" => $email, "array" => $all_rows);
          }
 
-         return array("returnCode" => "1", "followCode" => "0", "array" => $all_rows);
+         return array("returnCode" => "1", "followCode" => "0", "email" => $email, "array" => $all_rows);
 
 }
 
