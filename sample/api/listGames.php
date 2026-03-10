@@ -81,12 +81,12 @@ if($_SERVER["REQUEST_METHOD"] == "POST" && $_POST["search"] !="" )
     	echo "<li>";
 
 	//$dataName = $game['name'];
-	$name = htmlspecialchars($game['name']); 
+	$name = htmlspecialchars($game['name']);
+        $released = htmlspecialchars($game['released']);	
 	$game_id = $game['id'];
-	echo "<a href='view_game.php?game_id=" . urlencode($game_id) . "'>$name</a> | ";
+	echo "<a href='view_game.php?game_id=" . urlencode($game_id) . "'>$name</a> || ";
 	
-	echo "Released: " . htmlspecialchars($game['released']) . " | ";
-	$released =  htmlspecialchars($game['released']); 
+	echo "Released: $release || ";
 	
 	if($released == ""){
 		$released = "N/A";
@@ -101,11 +101,11 @@ if($_SERVER["REQUEST_METHOD"] == "POST" && $_POST["search"] !="" )
 		$mainGenre = htmlspecialchars($game['genres'][0]['name']);
     	}
 
-    	echo "| Platforms: ";
+    	echo "|| Platforms: ";
 
     	if (!empty($game['platforms'])) {
         	foreach ($game['platforms'] as $platform) {
-            	echo htmlspecialchars($platform['platform']['name']) . " ";
+            	echo  htmlspecialchars($platform['platform']['name']) . " ";
         	}
 	}
 	 echo "<form action='review_game.php' method='POST' style='display:inline;'>";
