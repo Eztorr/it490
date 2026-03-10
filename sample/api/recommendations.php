@@ -48,27 +48,27 @@ if (empty($response['genres'])){
         $genreParam = implode(',', $genreSlugs);
 
    
-        $url = "https://api.rawg.io/api/games?key=$apiKey&genres=$genreParam&page_size=100&ordering=-rating";
+        $rawgAPIurl = "https://api.rawg.io/api/games?key=$apiKey&genres=$genreParam&page_size=100&ordering=-rating";
 
-	$ch = curl_init();
+	$curl = curl_init();
 
-	curl_setopt($ch, CURLOPT_URL, $url);
-	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-	curl_setopt($ch, CURLOPT_HTTPGET, true);
+	curl_setopt($curl, CURLOPT_URL, $rawgAPIurl);
+	curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+	curl_setopt($curl, CURLOPT_HTTPGET, true);
 
-	$responseCurl = curl_exec($ch);
+	$responseCurl = curl_exec($curl);
 
-	if (curl_errno($ch)) {
-    		echo "cURL Error: " . curl_error($ch);
-    		curl_close($ch);
+	if (curl_errno($curl)) {
+    		echo "cURL Error: " . curl_error($curl);
+    		curl_close($curl);
     		exit;
 	}
 
-	curl_close($ch);
+	curl_close($curl);
         
-	$data = json_decode($responseCurl, true);
+	$rawgAPIdata = json_decode($responseCurl, true);
 
-	if (!$data) {
+	if (!$rawgAPIdata) {
 		
     		die("Error decoding JSON response.");
 	}
@@ -82,7 +82,7 @@ if (empty($response['genres'])){
 	echo "<h2>Video Game Recommendations:</h2>";
 	echo "<ul>";
 
-	foreach ($data['results'] as $game) {
+	foreach ($rawgAPIdata['results'] as $game) {
 
     	echo "<li>";
 	
