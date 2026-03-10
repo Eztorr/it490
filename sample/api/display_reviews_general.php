@@ -1,5 +1,7 @@
+
 <!DOCTYPE html>
 <html>
+	<?php include_once('../app/navBar.php'); ?>
 	<h1>BROWSE REVIEWS!</h1>
 	<form method="GET">
 		<label>Search:</label>
@@ -9,6 +11,13 @@
 </html>
 
 <?php
+if (!isset($_SESSION['token']) || empty($_SESSION['token']))
+{
+	header("Location: ../loginPage.php");
+	exit();
+}
+
+
 require_once('../app/path.inc');
 require_once('../app/get_host_info.inc');
 require_once('../app/rabbitMQLib.inc');
@@ -28,6 +37,9 @@ $response = getReviews($search);
 
 if($response['returnCode'] == 1 && !empty($response['array'])){
 	foreach($response['array'] as $review){
+		if($review['is_private'] == 1){
+			continue;
+		}
 		echo "<p>";
 		//review id?
 		//echo <label>Review ID: </label>;
@@ -44,10 +56,11 @@ if($response['returnCode'] == 1 && !empty($response['array'])){
 		echo "<br>";
 		//new line for review id and email hyperlink to profilePage.php
 		echo "<label>Reviewer ID:  </label>";
-		echo $review['reviewer_id'];
+		$id = $review['reviewer_id'];
+		echo $id;
 		echo " - ";
 		echo "<label>Reviewer Email:  </label>";
-		echo "<a href='../profilePage.php'>" . $review['reviewer_email'] . "</a>";
+		echo "<a href='../profilePage.php?user_id=$id'>" . $review['reviewer_email'] . "</a>";
 		echo "<br>";
 		//new line for rating
 		echo "<label>Rating:  </label>";

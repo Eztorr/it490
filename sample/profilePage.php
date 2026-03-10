@@ -51,7 +51,8 @@ if (!$myAccount && $_SESSION['user_id'] != $profileID) { //if its not my account
     if(isset($response['followCode']) && $response['followCode'] == '1'){
         $followStatus = true; //user follows the profile
     }
-} 
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -71,10 +72,11 @@ if (!$myAccount && $_SESSION['user_id'] != $profileID) { //if its not my account
            </h1>
            <p>viewing user id: <?php echo $profileID; ?></p>
            <p> owner mode: <?php echo $myAccount ? '1' : '0'; ?></p>
-           <!--<p><strong>Email:</strong> <?php echo ($_SESSION['email']); ?></p>-->
+          <!-- <p><strong>Email:</strong> <?php echo ($_SESSION['email']); ?></p>-->
            <?php if ($myAccount): ?>
            <p><strong>Email:</strong> <?php echo ($_SESSION['email']); ?></p>
-           <?php else:?>
+	   <?php else:?>
+	   <p><strong>Email:</strong> <?php echo ($reviews[0]['email']); ?></p>
             <!-- other profile would show follow button, but if mine, don't show it -->
              <form method = "POST" action="/app/followUser.php">
                 <input type="hidden" name="follow_id" value="<?php echo $profileID; ?>">
