@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html>
-	<h1>REVIEWS</h1>
+	<h1>BROWSE REVIEWS!</h1>
 	<form method="GET">
 		<label>Search:</label>
 		<input type='text' name='search' value="<?php echo htmlspecialchars($search); ?>"></input>
@@ -28,14 +28,46 @@ $response = getReviews($search);
 
 if($response['returnCode'] == 1 && !empty($response['array'])){
 	foreach($response['array'] as $review){
-		echo "<p>" . $review['review_id'] . "</p>";
-		echo "<p>" . $review['reviewer_id'] ."</p>";
-		echo "<p>" . $review['reviewer_email'] . "</p>";
-		echo "<p>" . $review['game_id'] . "</p>";
-		echo "<p>" . $review['rating'] . "</p>";
-		echo "<p>" . htmlspecialchars($review['text']) . "</p>";
-		echo "<p>" . $review['is_private'] . "</p>";
-		echo "<p>" . htmlspecialchars($review['game_name']) . "</p>";
+		echo "<p>";
+		//review id?
+		//echo <label>Review ID: </label>;
+		//echo $review['review_id'];
+		//echo <br>;
+		
+		//show game id first
+		echo "<label>Game ID:  </label>";
+		echo $review['game_id'];
+		echo "<br>";
+		//game name second
+		echo "<label>Game Name:  </label>";
+		echo htmlspecialchars($review['game_name']);
+		echo "<br>";
+		//new line for review id and email hyperlink to profilePage.php
+		echo "<label>Reviewer ID:  </label>";
+		echo $review['reviewer_id'];
+		echo " - ";
+		echo "<label>Reviewer Email:  </label>";
+		echo "<a href='../profilePage.php'>" . $review['reviewer_email'] . "</a>";
+		echo "<br>";
+		//new line for rating
+		echo "<label>Rating:  </label>";
+		echo $review['rating'];
+		echo "<br>";
+		//new line for actual review hide if its private
+		echo "<label>Review: </label>";
+		if($review['is_private'] == 0){
+			echo htmlspecialchars($review['text']);
+			$pubOrPriv = "Public";
+		}else{
+			echo "Cannot show private reviews";
+			$pubOrPriv = "Private";
+
+		}
+		//bellow say if it private or not
+		echo "<br>";
+		echo "<label>Public/Private: </label>";
+		echo "$pubOrPriv";
+		echo "</p>";
 	}
 }else{
 	echo "<p> no reviews found</p>";

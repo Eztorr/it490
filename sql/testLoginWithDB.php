@@ -376,13 +376,12 @@ function getAll($search){
 	global $mydb;
          $query = "
         SELECT 
-            User_Reviews.review_id,
             User_Reviews.user_id AS reviewer_id,
             Users.email AS reviewer_email,
             User_Reviews.game_id,
             User_Reviews.rating,
             User_Reviews.text,
-	    User_Reviews.is_private
+	    User_Reviews.is_private,
 	    Games.game AS game_name
         FROM 
             User_Reviews
