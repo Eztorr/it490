@@ -284,13 +284,16 @@ function getFollowedReviews($user_id){
             User_Reviews.game_id,
             User_Reviews.rating,
             User_Reviews.text,
-            User_Reviews.is_private
+	    User_Reviews.is_private,
+	    Games.game AS game_name
         FROM 
             User_Following
         JOIN 
             User_Reviews ON User_Following.following_id = User_Reviews.user_id
         JOIN 
-            Users ON User_Reviews.user_id = Users.id
+	    Users ON User_Reviews.user_id = Users.id
+	JOIN 
+	    Games ON User_Reviews.game_id = Games.game_id
         WHERE 
             User_Following.user_id = ?;
     ";
