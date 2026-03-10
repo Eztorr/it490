@@ -547,6 +547,10 @@ function getProfileALL($user_id, $follow_id, $viewer_id){
 	 }
 	 $response = $stmt->get_result();
 	 $row = $response->fetch_assoc();
+	 if(empty($row)){
+		 echo "EMPTY";
+	 	return array("returnCode" => "0");
+	 }
 	 $email = $row['email'];
 	 $stmt->close();
 
