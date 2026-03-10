@@ -39,10 +39,17 @@ if (empty($response['genres'])){
 	}
 
 	$apiKey = $env['RAWG_API_KEY'];
+	
+       //this code converts an array of genres(which is what is stored in the db) to 
+	//an array of genre slugs which is what rawg uses as essentially tags for their 
+	//genres when searching the api. Exampe Grand Strategy would be converted 
+	//to grand-strategy. I realized later that their list feature actually returns 
+	//genre slugs so I could have stored those in the db instead. Ill fix it later 
+	 $genreSlugs = [];
 
-	 $genreSlugs = array_map(function($genre){
-        return strtolower(str_replace(' ', '-', $genre));
-         }, $response['genres']);
+	foreach ($response['genres'] as $genre) {
+    	$genreSlugs[] = strtolower(str_replace(' ', '-', $genre));
+	}
 
    
         $genreParam = implode(',', $genreSlugs);
