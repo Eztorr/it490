@@ -36,6 +36,10 @@ $request = ['type' => 'get_profile_all',
 ];
 $response = $client->send_request($request);
 
+if(isset($response['returnCode']) && $response['returnCode'] == '0'){
+        header("Location: /profilePage.php");
+    	exit();
+    }
 //if reviews is in the array then store to reviews
 if (isset($response ['array']) && is_array($response['array'])) 
     {
