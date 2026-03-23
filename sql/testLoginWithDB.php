@@ -54,7 +54,7 @@ function doLogin($email,$password)
 	    $stmt = $mydb->prepare($query);
 	    $stmt->bind_param('issss', $user_id, $token, $expiration_date, $token, $expiration_date);  
     	    $stmt->execute();
-            return array("returnCode" => "1", "message" => "Login successful", "token" => "$token");
+            return array("returnCode" => "1", "message" => "Login successful", "token" => "$token", "email" => $row['email'], "user_id" => $row['id']);
         }
     }
 
@@ -141,6 +141,446 @@ function deleteSession($sessionID)
 	return array ("returnCode" => 1, "message" => "session deleted/ logged out!!!");
 }
 
+function newReview($user_id, $game, $rating, $reviewText, $genre, $release, $is_private){
+	global $mydb;
+	$query = "INSERT IGNORE INTO Games (game, genre, release_date) VALUES (?, ?, ?)";
+	$stmt = $mydb->prepare($query);
+        $stmt->bind_param('sss', $game, $genre, $release);
+	if (!$stmt->execute())
+        {
+                echo "failed to execute query:".PHP_EOL;
+                echo __FILE__.':'.__LINE__.":error: ".$mydb->error.php_EOL;
+                return array ("returnCode" => 0, "message" => "db error");
+        }
+
+
+	$stmt->close();
+
+	$query = "SELECT game_id FROM Games WHERE game = ?";
+        $stmt = $mydb->prepare($query);
+        $stmt->bind_param('s', $game);
+
+	if (!$stmt->execute())
+        {
+                echo "failed to execute query:".PHP_EOL;
+                echo __FILE__.':'.__LINE__.":error: ".$mydb->error.php_EOL;
+                return array ("returnCode" => 0, "message" => "db error");
+        }
+
+
+	$response = $stmt->get_result();
+	$row = $response->fetch_assoc();
+
+	$stmt->close();
+
+	$query = "INSERT INTO User_Reviews (user_id, game_id, rating, text, is_private) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE rating = ?, text = ?, is_private = ? ;";
+        $stmt = $mydb->prepare($query);
+        $stmt->bind_param('iiisissi', $user_id, $row['game_id'], $rating, $reviewText, $is_private, $rating, $reviewText, $is_private);
+        if (!$stmt->execute())
+        {
+                echo "failed to execute query:".PHP_EOL;
+                echo __FILE__.':'.__LINE__.":error: ".$mydb->error.php_EOL;
+                return array ("returnCode" => 0, "message" => "db error");
+        }
+
+	
+	return array ("returnCode" => 1, "message" => "review uploaded");
+
+
+
+}
+
+function handlePrivate($user_id, $game)
+{      
+	global $mydb;
+	//gets game_id based on game name
+	global $mydb;
+        $query = "SELECT game_id FROM Games WHERE game = ?";
+        $stmt = $mydb->prepare($query);
+        $stmt->bind_param('s', $game);
+
+        if (!$stmt->execute())
+        {
+                echo "failed to execute query:".PHP_EOL;
+                echo __FILE__.':'.__LINE__.":error: ".$mydb->error.php_EOL;
+                return array ("returnCode" => 0, "message" => "db error");
+        }
+
+
+        $response = $stmt->get_result();
+        $row = $response->fetch_assoc();
+	
+	$stmt->close();
+
+        $query = "SELECT is_private FROM User_Reviews WHERE user_id = ? AND game_id = ?;";
+        $stmt = $mydb->prepare($query);
+	$stmt->bind_param('ii', $user_id, $row['game_id']);
+	$game_id = $row['game_id'];
+
+        if (!$stmt->execute()) {
+            echo "Failed to execute query: " . PHP_EOL;
+            echo __FILE__ . ':' . __LINE__ . ": error: " . $mydb->error . PHP_EOL;
+            return array("returnCode" => 0, "message" => "Database error");
+    }
+
+        $response = $stmt->get_result();
+    
+        if ($response->num_rows > 0) {
+            $row = $response->fetch_assoc();
+            $currentPrivacy = $row['is_private'];
+	
+             $newPrivacy = ($currentPrivacy == 0) ? 1 : 0;
+	    
+	    $stmt->close();
+
+            $query = "UPDATE User_Reviews SET is_private = ? WHERE user_id = ? AND game_id = ?;";
+            $stmt = $mydb->prepare($query);
+            $stmt->bind_param('iii', $newPrivacy, $user_id, $game_id);
+
+        if (!$stmt->execute()) {
+            echo "Failed to execute query: " . PHP_EOL;
+            echo __FILE__ . ':' . __LINE__ . ": error: " . $mydb->error . PHP_EOL;
+            return array("returnCode" => 0, "message" => "Database error during update");
+        }
+
+        return array("returnCode" => 1, "message" => "Review privacy updated successfully");
+    } else {
+        return array("returnCode" => 0, "message" => "Review not found");
+    }
+}
+
+
+function getReviews($user_id){
+
+	global $mydb;
+         $query = "SELECT * FROM User_Reviews Join Games ON User_Reviews.game_id = Games.game_id WHERE user_id = ?";
+         $stmt = $mydb->prepare($query);
+         $stmt->bind_param('i', $user_id);
+
+         if (!$stmt->execute())
+{
+            echo "failed to execute query:".PHP_EOL;
+            echo __FILE__.':'.__LINE__.":error: ".$mydb->error.PHP_EOL;
+            return array("returnCode" => 2, "message" => "db error /session not valid");
+         }
+	 $response = $stmt->get_result();
+
+	 $all_rows = $response->fetch_all(MYSQLI_ASSOC);
+
+	 return array("returnCode" => 1, "array" => $all_rows);
+
+
+
+}
+
+
+function getFollowedReviews($user_id){
+
+        global $mydb;
+        $query = "
+        SELECT 
+            User_Reviews.user_id AS reviewer_id,
+            Users.email AS reviewer_email,
+            User_Reviews.game_id,
+            User_Reviews.rating,
+            User_Reviews.text,
+	    User_Reviews.is_private,
+	    Games.game AS game_name
+        FROM 
+            User_Following
+        JOIN 
+            User_Reviews ON User_Following.following_id = User_Reviews.user_id
+        JOIN 
+	    Users ON User_Reviews.user_id = Users.id
+	JOIN 
+	    Games ON User_Reviews.game_id = Games.game_id
+        WHERE 
+            User_Following.user_id = ?;
+    ";
+         $stmt = $mydb->prepare($query);
+         $stmt->bind_param('i', $user_id);
+
+         if (!$stmt->execute())
+{
+            echo "failed to execute query:".PHP_EOL;
+            echo __FILE__.':'.__LINE__.":error: ".$mydb->error.PHP_EOL;
+            return array("returnCode" => 2, "message" => "db error /session not valid");
+         }
+         $response = $stmt->get_result();
+
+         $all_rows = $response->fetch_all(MYSQLI_ASSOC);
+
+         return array("returnCode" => 1, "array" => $all_rows);
+
+
+
+}
+
+function handleFollow($user_id, $follow_id){
+
+	 global $mydb;
+         $query = "SELECT * FROM User_Following WHERE user_id = ? AND following_id = ?";
+         $stmt = $mydb->prepare($query);
+         $stmt->bind_param('ii', $user_id, $follow_id);
+
+         if (!$stmt->execute())
+{
+            echo "failed to execute query:".PHP_EOL;
+            echo __FILE__.':'.__LINE__.":error: ".$mydb->error.PHP_EOL;
+            return array("returnCode" => 2, "message" => "db error /session not valid");
+         }
+         $response = $stmt->get_result();
+	 $stmt->close();
+
+
+
+
+	 if ($response->num_rows > 0) {
+	 	
+		$query = "DELETE FROM User_Following WHERE user_id = ? AND following_id = ?";
+                $stmt = $mydb->prepare($query);
+		$stmt->bind_param('ii', $user_id, $follow_id);
+
+		if (!$stmt->execute())
+{
+            echo "failed to execute query:".PHP_EOL;
+            echo __FILE__.':'.__LINE__.":error: ".$mydb->error.PHP_EOL;
+            return array("returnCode" => 2, "message" => "db error /session not valid");
+         }
+
+		$stmt->close();
+		return array("returnCode" => 1, "message" => "unfollowed");
+
+	 
+	 
+	 }else{
+	        $query = "INSERT INTO User_Following (user_id, following_id) VALUES (?, ?)";
+                $stmt = $mydb->prepare($query);
+                $stmt->bind_param('ii', $user_id, $follow_id);
+
+                if (!$stmt->execute())
+{
+            echo "failed to execute query:".PHP_EOL;
+            echo __FILE__.':'.__LINE__.":error: ".$mydb->error.PHP_EOL;
+            return array("returnCode" => 2, "message" => "db error /session not valid");
+         }
+		$stmt->close();
+                return array("returnCode" => 1, "message" => "followed");
+
+	 
+	 
+	 }
+
+}
+
+function getAll($search){
+	
+	global $mydb;
+         $query = "
+        SELECT 
+            User_Reviews.user_id AS reviewer_id,
+            Users.email AS reviewer_email,
+            User_Reviews.game_id,
+            User_Reviews.rating,
+            User_Reviews.text,
+	    User_Reviews.is_private,
+	    Games.game AS game_name
+        FROM 
+            User_Reviews
+        JOIN 
+	    Users ON Users.id = User_Reviews.user_id
+        JOIN 
+	    Games ON User_Reviews.game_id = Games.game_id
+        WHERE 
+	    Games.game LIKE ?";
+	
+	 $searchTerm = "%" . $search . "%";
+    
+         $stmt = $mydb->prepare($query);
+         $stmt->bind_param('s', $searchTerm);
+
+         if (!$stmt->execute())
+{
+            echo "failed to execute query:".PHP_EOL;
+            echo __FILE__.':'.__LINE__.":error: ".$mydb->error.PHP_EOL;
+            return array("returnCode" => 2, "message" => "db error");
+         }
+         $response = $stmt->get_result();
+
+         $all_rows = $response->fetch_all(MYSQLI_ASSOC);
+
+         return array("returnCode" => 1, "array" => $all_rows);
+
+
+}
+
+function getProfileInfo($user_id){
+
+	global $mydb;
+         $query = "SELECT * FROM Users WHERE id = ?";
+         $stmt = $mydb->prepare($query);
+         $stmt->bind_param('i', $user_id);
+
+         if (!$stmt->execute())
+{
+            echo "failed to execute query:".PHP_EOL;
+            echo __FILE__.':'.__LINE__.":error: ".$mydb->error.PHP_EOL;
+            return array("returnCode" => 2, "message" => "db error /session not valid");
+         }
+	 $response = $stmt->get_result();
+	 if ($response && $response->num_rows > 0) {
+
+		$row = $response->fetch_assoc();
+        	return array("returnCode" => "1", "user_id" => $row['id'], "email" => $row['email'], "joined" => $row['created'] );
+	 }
+
+	 return array("returnCode" => "0", "message" => "User does not exist");
+
+
+
+}
+
+function getFollowStatus($user_id, $follow_id){
+
+	global $mydb;
+         $query = "SELECT * FROM User_Following WHERE user_id = ? AND following_id = ?";
+         $stmt = $mydb->prepare($query);
+         $stmt->bind_param('ii', $user_id, $follow_id);
+
+         if (!$stmt->execute())
+{
+            echo "failed to execute query:".PHP_EOL;
+            echo __FILE__.':'.__LINE__.":error: ".$mydb->error.PHP_EOL;
+            return array("returnCode" => 2, "message" => "db error");
+         }
+         $response = $stmt->get_result();
+         if ($response && $response->num_rows > 0) {
+
+                $row = $response->fetch_assoc();
+                return array("returnCode" => "1", "message" => "following");
+         }
+
+         return array("returnCode" => "0", "message" => "Not following");
+
+} 
+
+function getRecommendations($user_id){
+
+	 global $mydb;
+         $query = "SELECT Games.genre, AVG(User_Reviews.rating) FROM User_Reviews JOIN Games ON User_Reviews.game_id = Games.game_id WHERE User_Reviews.user_id = ? GROUP BY Games.genre HAVING AVG(User_Reviews.rating) > 75";
+         $stmt = $mydb->prepare($query);
+         $stmt->bind_param('i', $user_id);
+
+         if (!$stmt->execute())
+{
+            echo "failed to execute query:".PHP_EOL;
+            echo __FILE__.':'.__LINE__.":error: ".$mydb->error.PHP_EOL;
+            return array("returnCode" => 2, "message" => "db error");
+	 }
+
+	 $response = $stmt->get_result();
+
+	 $genres = array();
+
+    	 while($row = $response->fetch_assoc()){
+         $genres[] = $row['genre'];
+	 }
+
+	 $stmt->close();
+
+	 if(count($genres) == 0){
+
+        	$query = "SELECT Games.genre, AVG(User_Reviews.rating) AS avg_rating FROM User_Reviews JOIN Games ON User_Reviews.game_id = Games.game_id WHERE User_Reviews.user_id = ? GROUP BY Games.genre ORDER BY avg_rating DESC LIMIT 3";
+
+        $stmt = $mydb->prepare($query);
+        $stmt->bind_param('i', $user_id);
+
+        if (!$stmt->execute()){
+            echo "failed to execute query:".PHP_EOL;
+            echo __FILE__.':'.__LINE__.":error: ".$mydb->error.PHP_EOL;
+            return array("returnCode" => 2, "message" => "db error /session not valid");
+        }
+
+        $response = $stmt->get_result();
+
+        while($row = $response->fetch_assoc()){
+            $genres[] = $row['genre'];
+        }
+    }
+	 
+	 
+	 return array("returnCode" => 1, "genres" => $genres);
+	 
+
+
+}
+
+function getProfileALL($user_id, $follow_id, $viewer_id){
+
+        global $mydb;
+	$query = "SELECT * FROM User_Reviews Join Games ON User_Reviews.game_id = Games.game_id Join Users ON User_Reviews.user_id = Users.id WHERE User_Reviews.user_id = ?";
+	if($viewer_id != $user_id){ $query .= " AND User_Reviews.is_private = 0"; }
+         $stmt = $mydb->prepare($query);
+         $stmt->bind_param('i', $user_id);
+
+         if (!$stmt->execute())
+{
+            echo "failed to execute query:".PHP_EOL;
+            echo __FILE__.':'.__LINE__.":error: ".$mydb->error.PHP_EOL;
+            return array("returnCode" => 2, "message" => "db error /session not valid");
+         }
+         $response = $stmt->get_result();
+
+	 $all_rows = $response->fetch_all(MYSQLI_ASSOC);
+	 $stmt->close();
+	
+ 	//this is here to get user email regardless of wether a review exisits or not	 
+	 $query = "SELECT email FROM Users WHERE id = ?";
+         $stmt = $mydb->prepare($query);
+         $stmt->bind_param('i', $user_id);
+
+         if (!$stmt->execute())
+{
+            echo "failed to execute query:".PHP_EOL;
+            echo __FILE__.':'.__LINE__.":error: ".$mydb->error.PHP_EOL;
+            return array("returnCode" => 2, "message" => "db error");
+	 }
+	 $response = $stmt->get_result();
+	 $row = $response->fetch_assoc();
+	 if(empty($row)){
+		 echo "EMPTY";
+	 	return array("returnCode" => "0");
+	 }
+	 $email = $row['email'];
+	 $stmt->close();
+
+         $query = "SELECT * FROM User_Following WHERE user_id = ? AND following_id = ?";
+         $stmt = $mydb->prepare($query);
+         $stmt->bind_param('ii', $viewer_id, $follow_id);
+
+         if (!$stmt->execute())
+{
+            echo "failed to execute query:".PHP_EOL;
+            echo __FILE__.':'.__LINE__.":error: ".$mydb->error.PHP_EOL;
+            return array("returnCode" => 2, "message" => "db error");
+         }
+         $response = $stmt->get_result();
+         if ($response && $response->num_rows > 0) {
+
+                $row = $response->fetch_assoc();
+                return array("returnCode" => "1", "followCode" => "1", "email" => $email, "array" => $all_rows);
+         }
+
+         return array("returnCode" => "1", "followCode" => "0", "email" => $email, "array" => $all_rows);
+
+}
+
+
+
+
+
+
+
 
 function requestProcessor($request)
 {
@@ -160,6 +600,30 @@ function requestProcessor($request)
 	    return doValidate($request['sessionId']);
      case "delete_session":
 	     return deleteSession($request['token']);
+     case "new_review":
+	     return newReview($request['user_id'], $request['game'], $request['rating'], $request['reviewText'], $request['genre'], $request['release_date'],$request['is_private']);
+     case "private":
+	     return handlePrivate($request['user_id'], $request['game']);
+     case "get_user_reviews":
+	     return getReviews($request['user_id']);
+     case "get_followed_reviews":
+	     return getFollowedReviews($request['user_id']);
+     case "follow":
+             return handleFollow($request['user_id'], $request['follow_id']);
+     case "get_all_reviews":
+             return getAll($request['search_string']);
+     case "get_profile_info":
+	     return getProfileInfo($request['user_id']);
+     case "get_follow_status":
+             return getFollowStatus($request['user_id'], $request['follow_id']);
+     case "get_recommendations":
+             return getRecommendations($request['user_id']);
+     case "get_profile_all":
+             return getProfileAll($request['user_id'], $request['follow_id'], $request['viewer_id']);
+
+
+
+
   }
   return array("returnCode" => '0', 'message'=>"Server received request and processed");
 }
